@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小數除法大冒險 - 香港小六數學 SEN 友善練習</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter & rounded fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Noto+Sans+TC:wght@400;600;700;900&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            blue: '#3b82f6',
+                            yellow: '#f59e0b',
+                            green: '#10b981',
+                            purple: '#8b5cf6',
+                            pink: '#ec4899',
+                            bg: '#f0f9ff'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Noto Sans TC', 'Fredoka', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #f0f9ff;
+            background-image: radial-gradient(#e0f2fe 2px, transparent 2px);
+            background-size: 24px 24px;
+            font-family: 'Noto Sans TC', 'Fredoka', sans-serif;
+            user-select: none;
+        }
+        .bounce-gentle {
+            animation: bounceGentle 2s infinite;
+        }
+        @keyframes bounceGentle {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+        .btn-3d {
+            transition: all 0.15s ease;
+            box-shadow: 0 6px 0 rgba(0,0,0,0.15);
+        }
+        .btn-3d:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 rgba(0,0,0,0.15);
+        }
+        /* Custom scrollbar for SEN friendly clear view */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #e2e8f0;
+            border-radius: 8px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body class="min-h-screen text-slate-800 flex flex-col justify-between p-2 md:p-6">
+
+    <!-- Header / Scoreboard -->
+    <header class="max-w-4xl mx-auto w-full bg-white/90 backdrop-blur-md rounded-2xl p-4 shadow-lg border-2 border-sky-200 mb-4">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+            <!-- App Title & Mascot Avatar -->
+            <div class="flex items-center space-x-3">
+                <div class="w-12 h-12 bg-yellow-400 rounded-full flex items-center justify-center text-2xl shadow-inner bounce-gentle">
+                    🐻
+                </div>
+                <div>
+                    <h1 class="text-xl md:text-2xl font-black text-sky-700 tracking-wide">小數除法大冒險</h1>
+                    <p class="text-xs text-sky-500 font-bold">小六數學 • SEN 學習支援版</p>
+                </div>
+            </div>
+
+            <!-- Level & Progress Indicators -->
+            <div class="flex items-center space-x-4">
+                <div class="bg-amber-100 border-2 border-amber-300 px-3 py-1.5 rounded-xl flex items-center space-x-1">
+                    <i class="fa-solid font-bold text-amber-500 fa-star text-lg"></i>
+                    <span id="scoreDisplay" class="font-black text-amber-700 text-lg">0</span>
+                    <span class="text-xs text-amber-600 font-bold">分</span>
+                </div>
+                
+                <div class="bg-purple-100 border-2 border-purple-300 px-3 py-1.5 rounded-xl flex items-center space-x-2">
+                    <i class="fa-solid fa-layer-group text-purple-600"></i>
+                    <span id="levelBadge" class="font-bold text-purple-800 text-sm">初級關卡</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="mt-3 w-full bg-slate-200 h-4 rounded-full overflow-hidden border border-slate-300">
+            <div id="progressBar" class="bg-gradient-to-r from-sky-400 to-blue-600 h-full w-0 transition-all duration-500 rounded-full"></div>
+        </div>
+        <div class="flex justify-between text-xs font-bold text-slate-500 mt-1 px-1">
+            <span>第 <span id="currentQNum">1</span> / 20 題</span>
+            <span id="progressPercent">5%</span>
+        </div>
+    </header>
+
+    <!-- Main Game Workspace -->
+    <main class="max-w-4xl mx-auto w-full flex-grow flex flex-col justify-center">
+        <!-- Question Card Container -->
+        <div class="bg-white rounded-3xl p-5 md:p-8 shadow-xl border-4 border-sky-300 relative overflow-hidden">
+            
+            <!-- Question Level Tag & TTS Read Button Header -->
+            <div class="flex flex-wrap items-center justify-between gap-2 pb-4 mb-4 border-b-2 border-sky-100">
+                <span id="questionTag" class="bg-sky-100 text-sky-800 font-bold px-3 py-1 rounded-lg text-sm flex items-center gap-2">
+                    <i class="fa-solid fa-flag"></i> 第 1 題：基礎小數點移動
+                </span>
+                
+                <!-- Cantonese TTS Audio Button -->
+                <button onclick="readQuestionTTS()" class="bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white font-bold px-4 py-2 rounded-xl text-base flex items-center gap-2 btn-3d shadow-md">
+                    <i class="fa-solid fa-volume-high text-xl"></i>
+                    <span>🔊 廣東話朗讀題目</span>
+                </button>
+            </div>
+
+            <!-- Question Text / Formula Display -->
+            <div class="text-center my-6">
+                <div id="questionText" class="text-3xl md:text-5xl font-black text-slate-800 tracking-wider leading-relaxed my-2">
+                    97 ÷ 10 = ?
+                </div>
+                <p id="questionHint" class="text-slate-500 text-base md:text-lg mt-2 font-semibold">
+                    請選出正確的計算結果：
+                </p>
+            </div>
+
+            <!-- Options Grid (SEN friendly big clickable buttons) -->
+            <div id="optionsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                <!-- Dynamic options injected here -->
+            </div>
+
+            <!-- Encouragement Mascot Footer inside card -->
+            <div class="mt-8 bg-sky-50 border-2 border-sky-200 rounded-2xl p-3 flex items-center space-x-3">
+                <div class="text-3xl">💡</div>
+                <div class="text-sm text-sky-800 font-medium" id="mascotMessage">
+                    加油！用心觀察小數點的位置，向左還是向右移動呢？
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Incorrect Answer / Visual Explanation Modal (Critical SEN Feature) -->
+    <div id="explanationModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-3 hidden">
+        <div class="bg-white rounded-3xl max-w-2xl w-full max-h-[92vh] overflow-y-auto p-5 md:p-7 shadow-2xl border-4 border-amber-400 flex flex-col justify-between">
+            
+            <!-- Modal Title Header -->
+            <div class="flex items-center justify-between border-b-2 border-slate-100 pb-3">
+                <div class="flex items-center space-x-2 text-amber-600 font-black text-xl md:text-2xl">
+                    <span class="text-3xl">✏️</span>
+                    <span>別擔心！我們一起看圖解解題</span>
+                </div>
+                <button onclick="readExplanationTTS()" class="bg-sky-500 hover:bg-sky-600 text-white font-bold px-3 py-1.5 rounded-xl text-sm flex items-center gap-1.5 btn-3d">
+                    <i class="fa-solid fa-volume-high"></i> 朗讀解題
+                </button>
+            </div>
+
+            <!-- Explanation Content Container -->
+            <div class="my-4 space-y-4">
+                
+                <!-- Rule Reminder Banner -->
+                <div id="explanationRuleBox" class="bg-amber-50 border-2 border-amber-300 text-amber-900 rounded-2xl p-4 font-semibold text-base md:text-lg">
+                    <!-- Rule description injected here -->
+                </div>
+
+                <!-- Dynamic Graphical Helper Canvas / Place Value Table -->
+                <div class="bg-slate-50 border-2 border-slate-200 rounded-2xl p-4 overflow-x-auto">
+                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">【位值變化與小數點移動圖示】</h4>
+                    
+                    <div id="placeValueGraphicContainer" class="min-w-[320px]">
+                        <!-- Dynamic SVG & HTML Place Value Table injected here -->
+                    </div>
+                </div>
+
+                <!-- Step-by-step summary text -->
+                <div id="explanationText" class="text-slate-700 font-medium text-base leading-relaxed bg-blue-50 p-4 rounded-2xl border border-blue-200">
+                    <!-- Step by step text -->
+                </div>
+
+            </div>
+
+            <!-- Modal Action Footer -->
+            <div class="pt-3 border-t-2 border-slate-100 flex justify-end space-x-3">
+                <button onclick="retryCurrentQuestion()" class="w-full md:w-auto bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-black text-lg px-8 py-3.5 rounded-2xl btn-3d shadow-lg flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-arrows-rotate"></i>
+                    <span>我明白了！再試一次</span>
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Level Complete / Game Over Modal -->
+    <div id="victoryModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 md:p-8 shadow-2xl border-4 border-yellow-400 text-center relative overflow-hidden">
+            <div class="text-6xl my-2 bounce-gentle">🏆</div>
+            <h2 id="victoryTitle" class="text-3xl font-black text-amber-600 mb-2">太棒了！完成冒險！</h2>
+            <p id="victorySubtitle" class="text-slate-600 font-bold mb-6 text-lg">你完成了所有的小數除法挑戰！</p>
+            
+            <div class="bg-amber-50 rounded-2xl p-4 border-2 border-amber-200 mb-6 space-y-2">
+                <div class="flex justify-between items-center text-lg font-bold text-amber-800">
+                    <span>最終得分：</span>
+                    <span id="finalScore" class="text-3xl text-amber-600 font-black">100</span>
+                </div>
+                <div class="flex justify-between items-center text-sm font-semibold text-slate-600">
+                    <span>獲得稱號：</span>
+                    <span id="finalBadge" class="bg-yellow-400 text-slate-900 px-3 py-1 rounded-full font-bold">小數點大師 🌟</span>
+                </div>
+            </div>
+
+            <button onclick="restartGame()" class="w-full bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white font-black text-xl py-4 rounded-2xl btn-3d shadow-xl flex items-center justify-center gap-2">
+                <i class="fa-solid fa-rotate-right"></i>
+                <span>重新開始冒險</span>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // 20 Questions Data structured into 3 Difficulty Levels
+        const questionBank = [
+            // --- 初級 (第 1 - 7 題) ---
+            {
+                id: 1,
+                level: 1,
+                levelName: '初級：除以 10 / 100 / 1000',
+                questionText: '97 ÷ 10 = ?',
+                spokenText: '九十七除以十等於多少？',
+                options: ['970', '9.7', '0.97'],
+                answer: '9.7',
+                numStr: '97',
+                divisor: 10,
+                type: 'shift_left',
+                shifts: 1,
+                rule: '除以 10 時，數值變小，小數點要向【左】移動 1 位。',
+                explanationText: '原本的 97 就是 97.0，除以 10 代表整體縮小 10 倍，小數點向左移動 1 位，答案是 9.7。'
+            },
+            {
+                id: 2,
+                level: 1,
+                levelName: '初級：除以 10 / 100 / 1000',
+                questionText: '4 ÷ 100 = ?',
+                spokenText: '四除以一百等於多少？',
+                options: ['0.4', '0.04', '0.004'],
+                answer: '0.04',
+                numStr: '4',
+                divisor: 100,
+                type: 'shift_left',
+                shifts: 2,
+                rule: '除以 100 時，數值變小，小數點要向【左】移動 2 位。',
+                explanationText: '4 可以看成 4.0。向左移 1 位是 0.4，向左移 2 位（缺位補 0）變成 0.04。'
+            },
+            {
+                id: 3,
+                level: 1,
+                levelName: '初級：除以 0.1',
+                questionText: '2.5 ÷ 0.1 = ?',
+                spokenText: '二點五除以零點一等於多少？',
+                options: ['25', '0.25', '250'],
+                answer: '25',
+                numStr: '2.5',
+                divisor: 0.1,
+                type: 'shift_right',
+                shifts: 1,
+                rule: '除以 0.1 等於乘以 10，小數點要向【右】移動 1 位。',
+                explanationText: '除以 0.1 會讓數值變大 10 倍。將 2.5 的小數點向右移動 1 位，得到 25。'
+            },
+            {
+                id: 4,
+                level: 1,
+                levelName: '初級：除以 10 / 100 / 1000',
+                questionText: '47 ÷ 100 = ?',
+                spokenText: '四十七除以一百等於多少？',
+                options: ['4.7', '0.47', '0.047'],
+                answer: '0.47',
+                numStr: '47',
+                divisor: 100,
+                type: 'shift_left',
+                shifts: 2,
+                rule: '除以 100 時，小數點要向【左】移動 2 位。',
+                explanationText: '47.0 的小數點向左移 1 位是 4.7，再移 1 位（共 2 位）是 0.47。'
+            },
+            {
+                id: 5,
+                level: 1,
+                levelName: '初級：除以 0.1',
+                questionText: '0.81 ÷ 0.1 = ?',
+                spokenText: '零點八一除以零點一等於多少？',
+                options: ['8.1', '81', '0.081'],
+                answer: '8.1',
+                numStr: '0.81',
+                divisor: 0.1,
+                type: 'shift_right',
+                shifts: 1,
+                rule: '除以 0.1 時，數值變大，小數點向【右】移動 1 位。',
+                explanationText: '0.81 除以 0.1 等於 0.81 乘以 10，小數點向右移 1 位，結果是 8.1。'
+            },
+            {
+                id: 6,
+                level: 1,
+                levelName: '初級：除以 10 / 100 / 1000',
+                questionText: '730 ÷ 1000 = ?',
+                spokenText: '七百三十除以一千等於多少？',
+                options: ['73', '7.3', '0.73'],
+                answer: '0.73',
+                numStr: '730',
+                divisor: 1000,
+                type: 'shift_left',
+                shifts: 3,
+                rule: '除以 1000 時，小數點向【左】移動 3 位。',
+                explanationText: '730.0 向左移動 3 位：73.0 -> 7.30 -> 0.730，末尾的 0 可省略，為 0.73。'
+            },
+            {
+                id: 7,
+                level: 1,
+                levelName: '初級：除以 0.1',
+                questionText: '1.94 ÷ 0.1 = ?',
+                spokenText: '一點九四除以零點一等於多少？',
+                options: ['0.194', '19.4', '194'],
+                answer: '19.4',
+                numStr: '1.94',
+                divisor: 0.1,
+                type: 'shift_right',
+                shifts: 1,
+                rule: '除以 0.1 等於乘以 10，小數點向【右】移動 1 位。',
+                explanationText: '1.94 的小數點向右移動 1 位後變成 19.4。'
+            },
+
+            // --- 中級 (第 8 - 14 題) ---
+            {
+                id: 8,
+                level: 2,
+                levelName: '中級：除以 0.01 / 0.001',
+                questionText: '5.2 ÷ 0.01 = ?',
+                spokenText: '五點二除以零點零一等於多少？',
+                options: ['520', '52', '0.052'],
+                answer: '520',
+                numStr: '5.2',
+                divisor: 0.01,
+                type: 'shift_right',
+                shifts: 2,
+                rule: '除以 0.01 等於乘以 100，小數點要向【右】移動 2 位。',
+                explanationText: '5.2 的小數點向右移 1 位是 52，再移 1 位（補 0）變成 520。'
+            },
+            {
+                id: 9,
+                level: 2,
+                levelName: '中級：除以 0.01 / 0.001',
+                questionText: '3.6 ÷ 0.01 = ?',
+                spokenText: '三點六除以零點零一等於多少？',
+                options: ['36', '360', '3600'],
+                answer: '360',
+                numStr: '3.6',
+                divisor: 0.01,
+                type: 'shift_right',
+                shifts: 2,
+                rule: '除以 0.01 等於乘以 100，小數點向【右】移動 2 位。',
+                explanationText: '3.6 向右移動 2 位：36 -> 360。答案是 360。'
+            },
+            {
+                id: 10,
+                level: 2,
+                levelName: '中級：除以 0.01 / 0.001',
+                questionText: '6.08 ÷ 0.001 = ?',
+                spokenText: '六點零八除以零點零零一等於多少？',
+                options: ['60.8', '608', '6080'],
+                answer: '6080',
+                numStr: '6.08',
+                divisor: 0.001,
+                type: 'shift_right',
+                shifts: 3,
+                rule: '除以 0.001 等於乘以 1000，小數點要向【右】移動 3 位。',
+                explanationText: '6.08 的小數點向右移 3 位：60.8 -> 608 -> 6080。答案是 6080。'
+            },
+            {
+                id: 11,
+                level: 2,
+                levelName: '中級：多位小數除法',
+                questionText: '0.38 ÷ 100 = ?',
+                spokenText: '零點三八除以一百等於多少？',
+                options: ['0.038', '0.0038', '0.00038'],
+                answer: '0.0038',
+                numStr: '0.38',
+                divisor: 100,
+                type: 'shift_left',
+                shifts: 2,
+                rule: '除以 100 時，小數點向【左】移動 2 位。',
+                explanationText: '0.38 的小數點向左移 1 位是 0.038，再移 1 位是 0.0038。'
+            },
+            {
+                id: 12,
+                level: 2,
+                levelName: '中級：填補未知數',
+                questionText: '55 ÷ _____ = 0.55',
+                spokenText: '五十五除以甚麼數等於零點五五？',
+                options: ['10', '100', '1000'],
+                answer: '100',
+                type: 'fill_blank',
+                rule: '觀察小數點的位置：55 到 0.55，小數點向左移動了 2 位。',
+                explanationText: '因為小數點向左移動了 2 位，代表數值縮小了 100 倍，所以除數是 100。'
+            },
+            {
+                id: 13,
+                level: 2,
+                levelName: '中級：比較算式大小',
+                questionText: '以下哪道算式的結果最大？',
+                spokenText: '以下哪道算式的結果最大？',
+                options: ['A. 5.9 ÷ 0.001', 'B. 0.03 ÷ 0.01', 'C. 85 ÷ 1000', 'D. 2.4 ÷ 10'],
+                answer: 'A. 5.9 ÷ 0.001',
+                type: 'comparison_table',
+                comparisons: [
+                    { expr: 'A. 5.9 ÷ 0.001', val: '5900' },
+                    { expr: 'B. 0.03 ÷ 0.01', val: '3' },
+                    { expr: 'C. 85 ÷ 1000', val: '0.085' },
+                    { expr: 'D. 2.4 ÷ 10', val: '0.24' }
+                ],
+                rule: '逐一計算每個選項：5.9 ÷ 0.001 = 5900 是最大的！',
+                explanationText: 'A 等於 5900；B 等於 3；C 等於 0.085；D 等於 0.24。因此 A 的結果最大。'
+            },
+            {
+                id: 14,
+                level: 2,
+                levelName: '中級：比較算式結果',
+                questionText: '以下哪道算式的結果與其他的不同？',
+                spokenText: '以下哪道算式的結果與其他的不同？',
+                options: ['A. 726 ÷ 10', 'B. 7.26 ÷ 0.1', 'C. 72.6 ÷ 100', 'D. 0.726 ÷ 0.01'],
+                answer: 'C. 72.6 ÷ 100',
+                type: 'comparison_table',
+                comparisons: [
+                    { expr: 'A. 726 ÷ 10', val: '72.6' },
+                    { expr: 'B. 7.26 ÷ 0.1', val: '72.6' },
+                    { expr: 'C. 72.6 ÷ 100', val: '0.726 (不同!)' },
+                    { expr: 'D. 0.726 ÷ 0.01', val: '72.6' }
+                ],
+                rule: '計算各選項：A, B, D 的答案都是 72.6，只有 C 是 0.726。',
+                explanationText: 'A = 72.6, B = 72.6, D = 72.6。只有 C 的答案是 0.726，所以 C 與其他不同。'
+            },
+
+            // --- 高級 (第 15 - 20 題) ---
+            {
+                id: 15,
+                level: 3,
+                levelName: '高級：多重連除計算',
+                questionText: '91.8 ÷ 100 ÷ 0.1 = ?',
+                spokenText: '九十一點八除以一百，再除以零點一等於多少？',
+                options: ['0.918', '9.18', '91.8'],
+                answer: '9.18',
+                type: 'multi_step',
+                steps: [
+                    '第一步：91.8 ÷ 100 = 0.918 （小數點左移 2 位）',
+                    '第二步：0.918 ÷ 0.1 = 9.18 （小數點右移 1 位）'
+                ],
+                rule: '由左至右按順序一步步計算小數點移動。',
+                explanationText: '先算 91.8 ÷ 100 得 0.918；再算 0.918 ÷ 0.1，小數點向右移 1 位得 9.18。'
+            },
+            {
+                id: 16,
+                level: 3,
+                levelName: '高級：多重連除計算',
+                questionText: '8 ÷ 0.01 ÷ 1000 = ?',
+                spokenText: '八除以零點零一，再除以一千等於多少？',
+                options: ['0.8', '8', '80'],
+                answer: '0.8',
+                type: 'multi_step',
+                steps: [
+                    '第一步：8 ÷ 0.01 = 800 （小數點右移 2 位）',
+                    '第二步：800 ÷ 1000 = 0.8 （小數點左移 3 位）'
+                ],
+                rule: '第一步乘以 100，第二步除以 1000。',
+                explanationText: '第一步：8 ÷ 0.01 = 800。第二步：800 ÷ 1000 = 0.8。'
+            },
+            {
+                id: 17,
+                level: 3,
+                levelName: '高級：文字應用推導',
+                questionText: '最小的兩位奇數除以 1000 的商是多少？',
+                spokenText: '最小的兩位奇數除以一千的商是多少？',
+                options: ['0.11', '0.011', '0.0011'],
+                answer: '0.011',
+                type: 'multi_step',
+                steps: [
+                    '提示：最小的兩位奇數是 11',
+                    '算式：11 ÷ 1000 = 0.011 （小數點左移 3 位）'
+                ],
+                rule: '先找出「最小兩位奇數」為 11，再計算除以 1000。',
+                explanationText: '最小的兩位奇數是 11。11 ÷ 1000 的小數點向左移動 3 位，結果為 0.011。'
+            },
+            {
+                id: 18,
+                level: 3,
+                levelName: '高級：代數與規律',
+                questionText: '如果 0.123 ÷ ★ = 1.23，那麼 500 ÷ 100 ÷ ★ = ?',
+                spokenText: '如果零點一二三除以星號等於一點二三，那麼五百除以一百再除以星號等於多少？',
+                options: ['0.5', '5', '50'],
+                answer: '50',
+                type: 'multi_step',
+                steps: [
+                    '第一步：由 0.123 ÷ ★ = 1.23，得知 ★ = 0.1（小數點右移 1 位）',
+                    '第二步：500 ÷ 100 = 5',
+                    '第三步：5 ÷ ★ = 5 ÷ 0.1 = 50'
+                ],
+                rule: '先求出符號 ★ 代表 0.1，再代入後面的算式求解。',
+                explanationText: '因為 0.123 變成 1.23 表示乘以 10，故 ★ 為 0.1。500 ÷ 100 = 5，5 ÷ 0.1 = 50。'
+            },
+            {
+                id: 19,
+                level: 3,
+                levelName: '高級：小數性質推理',
+                questionText: '如果甲數是一個兩位小數，要得到最小的商，應該將甲數除以哪一個數？',
+                spokenText: '如果甲數是一個兩位小數，要得到最小的商，應該將甲數除以哪一個數？',
+                options: ['10', '100', '0.1', '0.01'],
+                answer: '100',
+                type: 'logic_reasoning',
+                rule: '口訣：被除數相同時，除數越大，計算出的【商】便越小。',
+                explanationText: '在選項 10、100、0.1、0.01 中，100 是最大的數。除以最大的數（100）會得到最小的商。'
+            },
+            {
+                id: 20,
+                level: 3,
+                levelName: '高級：綜合比較題',
+                questionText: '以下哪道算式的結果大於 1？',
+                spokenText: '以下哪道算式的結果大於一？',
+                options: ['A. 0.54 ÷ 0.1', 'B. 54 ÷ 100', 'C. 0.54 ÷ 10', 'D. 0.0054 ÷ 0.01'],
+                answer: 'A. 0.54 ÷ 0.1',
+                type: 'comparison_table',
+                comparisons: [
+                    { expr: 'A. 0.54 ÷ 0.1', val: '5.4 (大於 1 !)' },
+                    { expr: 'B. 54 ÷ 100', val: '0.54' },
+                    { expr: 'C. 0.54 ÷ 10', val: '0.054' },
+                    { expr: 'D. 0.0054 ÷ 0.01', val: '0.54' }
+                ],
+                rule: '被除數比除數大時，答案便大於 1。0.54 ÷ 0.1 = 5.4 > 1。',
+                explanationText: 'A 的結果是 5.4（大於 1）；B 是 0.54；C 是 0.054；D 是 0.54。所以選 A。'
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let isAnswered = false;
+        let selectedVoice = null;
+
+        function initCantoneseVoice() {
+            if ('speechSynthesis' in window) {
+                const updateVoices = () => {
+                    const voices = window.speechSynthesis.getVoices();
+                    // Prefer Cantonese zh-HK, fallback to Cantonese/Hong Kong variants or Mandarin
+                    selectedVoice = voices.find(v => v.lang === 'zh-HK' || v.lang.includes('HK') || v.lang.includes('yue')) ||
+                                    voices.find(v => v.lang.includes('zh')) || null;
+                };
+                updateVoices();
+                if (window.speechSynthesis.onvoiceschanged !== undefined) {
+                    window.speechSynthesis.onvoiceschanged = updateVoices;
+                }
+            }
+        }
+
+        function speakText(text) {
+            if (!('speechSynthesis' in window)) return;
+            window.speechSynthesis.cancel(); // stop previous speech
+
+            const utterance = new SpeechSynthesisUtterance(text);
+            if (selectedVoice) utterance.voice = selectedVoice;
+            utterance.lang = 'zh-HK';
+            utterance.rate = 0.82; // Slower, clear speed ideal for SEN students
+            utterance.pitch = 1.0;
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function readQuestionTTS() {
+            const q = questionBank[currentQuestionIndex];
+            speakText(q.spokenText || q.questionText);
+        }
+
+        function readExplanationTTS() {
+            const q = questionBank[currentQuestionIndex];
+            const textToRead = `${q.rule}。${q.explanationText}`;
+            speakText(textToRead);
+        }
+
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSound(type) {
+            try {
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                if (type === 'correct') {
+                    // Ascending happy chime
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+                    osc.frequency.exponentialRampToValueAtTime(659.25, audioCtx.currentTime + 0.1); // E5
+                    osc.frequency.exponentialRampToValueAtTime(783.99, audioCtx.currentTime + 0.25); // G5
+                    gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.4);
+                } else if (type === 'wrong') {
+                    // Gentle low warning bump
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(220, audioCtx.currentTime); // A3
+                    osc.frequency.exponentialRampToValueAtTime(164.81, audioCtx.currentTime + 0.2); // E3
+                    gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.3);
+                } else if (type === 'click') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+                    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.05);
+                }
+            } catch (e) {
+                console.log('Audio playback fallback');
+            }
+        }
+
+        function renderQuestion() {
+            isAnswered = false;
+            const q = questionBank[currentQuestionIndex];
+
+            // Update Header Progress
+            document.getElementById('currentQNum').innerText = currentQuestionIndex + 1;
+            document.getElementById('scoreDisplay').innerText = score;
+            
+            const pct = Math.round(((currentQuestionIndex + 1) / questionBank.length) * 100);
+            document.getElementById('progressBar').style.width = `${pct}%`;
+            document.getElementById('progressPercent').innerText = `${pct}%`;
+
+            // Update Level Badge
+            const levelBadge = document.getElementById('levelBadge');
+            if (q.level === 1) {
+                levelBadge.innerText = '初級關卡';
+                levelBadge.className = 'font-bold text-emerald-800 bg-emerald-100 border-2 border-emerald-300 px-3 py-1.5 rounded-xl text-sm';
+            } else if (q.level === 2) {
+                levelBadge.innerText = '中級關卡';
+                levelBadge.className = 'font-bold text-amber-800 bg-amber-100 border-2 border-amber-300 px-3 py-1.5 rounded-xl text-sm';
+            } else {
+                levelBadge.innerText = '高級關卡';
+                levelBadge.className = 'font-bold text-purple-800 bg-purple-100 border-2 border-purple-300 px-3 py-1.5 rounded-xl text-sm';
+            }
+
+            // Update Question Title
+            document.getElementById('questionTag').innerHTML = `<i class="fa-solid fa-flag"></i> 第 ${q.id} 題 • ${q.levelName}`;
+            document.getElementById('questionText').innerText = q.questionText;
+
+            // Render Option Buttons
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+
+            q.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = `btn-3d w-full bg-sky-50 hover:bg-sky-100 border-3 border-sky-300 text-sky-900 font-black text-xl md:text-2xl p-5 rounded-2xl text-center flex items-center justify-between shadow-sm border-2 transition-all hover:border-sky-500`;
+                btn.onclick = () => checkAnswer(opt);
+                
+                btn.innerHTML = `
+                    <span class="w-10 h-10 rounded-xl bg-sky-200 text-sky-800 flex items-center justify-center font-bold text-base mr-3">
+                        ${String.fromCharCode(65 + idx)}
+                    </span>
+                    <span class="flex-grow text-center">${opt}</span>
+                    <i class="fa-solid fa-circle-chevron-right text-sky-400 text-xl opacity-0 hover:opacity-100"></i>
+                `;
+                optionsContainer.appendChild(btn);
+            });
+
+            // Update Mascot Encouragement Message
+            const mascotMsgs = [
+                "相信自己！細心看看小數點移動幾多位！",
+                "你可以的！記得除以大數會變小，除以小數會變大！",
+                "放輕鬆～看清楚題目再按答案喔！",
+                "太棒了！一步一步來，你做得很好！"
+            ];
+            document.getElementById('mascotMessage').innerText = mascotMsgs[currentQuestionIndex % mascotMsgs.length];
+
+            // Auto read question for SEN support if speech enabled
+            setTimeout(() => {
+                readQuestionTTS();
+            }, 300);
+        }
+
+        function checkAnswer(selectedOpt) {
+            if (isAnswered) return;
+            isAnswered = true;
+
+            const q = questionBank[currentQuestionIndex];
+            if (selectedOpt === q.answer) {
+                // Correct Answer!
+                playSound('correct');
+                score += 5;
+                document.getElementById('scoreDisplay').innerText = score;
+
+                // Mascot praise
+                speakText("答對了！太厲害了！");
+                
+                setTimeout(() => {
+                    currentQuestionIndex++;
+                    if (currentQuestionIndex < questionBank.length) {
+                        renderQuestion();
+                    } else {
+                        showVictoryScreen();
+                    }
+                }, 1200);
+
+            } else {
+                // Incorrect Answer -> Trigger SEN Visual Explanation Modal
+                playSound('wrong');
+                speakText("答錯了，沒關係！我們一起看圖解！");
+                showExplanationModal(q);
+            }
+        }
+
+        function showExplanationModal(q) {
+            document.getElementById('explanationRuleBox').innerText = `💡 解題關鍵：${q.rule}`;
+            document.getElementById('explanationText').innerText = q.explanationText;
+
+            const graphicContainer = document.getElementById('placeValueGraphicContainer');
+            graphicContainer.innerHTML = '';
+
+            if (q.type === 'shift_left' || q.type === 'shift_right') {
+                // Generate Place Value Chart (百位, 十位, 個位, ., 十分位, 百分位, 千分位)
+                graphicContainer.appendChild(createPlaceValueTable(q));
+            } else if (q.type === 'comparison_table') {
+                // Generate Comparison Grid
+                graphicContainer.appendChild(createComparisonGrid(q));
+            } else if (q.type === 'multi_step') {
+                // Generate Multi-Step Flowchart
+                graphicContainer.appendChild(createMultiStepFlowchart(q));
+            } else {
+                // Default simple visual box
+                graphicContainer.innerHTML = `
+                    <div class="p-4 bg-sky-100 rounded-xl text-sky-900 font-bold text-center text-lg">
+                        ${q.questionText}
+                        <div class="mt-2 text-amber-700 text-2xl font-black">正解：${q.answer}</div>
+                    </div>
+                `;
+            }
+
+            document.getElementById('explanationModal').classList.remove('hidden');
+        }
+
+        // Helper 1: Place Value Table with animated directional arrow
+        function createPlaceValueTable(q) {
+            const wrapper = document.createElement('div');
+            wrapper.className = "flex flex-col items-center gap-3 w-full my-2";
+
+            const isLeft = q.type === 'shift_left';
+            const arrowDirection = isLeft ? '← 向左移動 (數值縮小)' : '向右移動 (數值變大) →';
+            const arrowBg = isLeft ? 'bg-amber-100 text-amber-800 border-amber-300' : 'bg-emerald-100 text-emerald-800 border-emerald-300';
+
+            wrapper.innerHTML = `
+                <div class="text-xs font-bold px-3 py-1 rounded-full border ${arrowBg} mb-1 flex items-center gap-1">
+                    <i class="fa-solid ${isLeft ? 'fa-arrow-left' : 'fa-arrow-right'}"></i>
+                    <span>小數點 ${arrowDirection} ${q.shifts} 位</span>
+                </div>
+
+                <!-- Table Header -->
+                <div class="grid grid-cols-7 gap-1 w-full text-center font-bold text-xs md:text-sm bg-sky-200 p-2 rounded-t-xl text-sky-900">
+                    <div>百位</div>
+                    <div>十位</div>
+                    <div>個位</div>
+                    <div class="text-red-600 font-black">.</div>
+                    <div>十分位</div>
+                    <div>百分位</div>
+                    <div>千分位</div>
+                </div>
+
+                <!-- Numerical visualization SVG/HTML -->
+                <div class="grid grid-cols-7 gap-1 w-full text-center font-black text-lg md:text-xl bg-white border-2 border-sky-200 p-3 rounded-b-xl shadow-inner">
+                    <div id="cell-100" class="text-slate-400">-</div>
+                    <div id="cell-10" class="text-slate-800"></div>
+                    <div id="cell-1" class="text-slate-800"></div>
+                    <div class="text-red-500 text-2xl font-black">.</div>
+                    <div id="cell-01" class="text-slate-800"></div>
+                    <div id="cell-001" class="text-slate-800"></div>
+                    <div id="cell-0001" class="text-slate-400">-</div>
+                </div>
+
+                <div class="mt-2 text-sm text-slate-600 font-bold bg-white px-4 py-2 rounded-xl border border-slate-200">
+                    原數：<span class="text-blue-600 text-lg">${q.numStr}</span> 
+                    → 計算後結果：<span class="text-emerald-600 text-xl font-black">${q.answer}</span>
+                </div>
+            `;
+
+            return wrapper;
+        }
+
+        // Helper 2: Comparison Grid generator
+        function createComparisonGrid(q) {
+            const container = document.createElement('div');
+            container.className = "space-y-2 w-full";
+
+            q.comparisons.forEach(item => {
+                const isTarget = item.expr.includes(q.answer) || item.val.includes('不同') || item.val.includes('大於 1');
+                const rowClass = isTarget 
+                    ? 'bg-amber-100 border-2 border-amber-400 text-amber-900 font-black' 
+                    : 'bg-white border border-slate-200 text-slate-700';
+
+                container.innerHTML += `
+                    <div class="p-3 rounded-xl flex justify-between items-center ${rowClass}">
+                        <span>${item.expr}</span>
+                        <span class="text-base font-bold">= ${item.val}</span>
+                    </div>
+                `;
+            });
+
+            return container;
+        }
+
+        // Helper 3: Multi-step Flowchart generator
+        function createMultiStepFlowchart(q) {
+            const container = document.createElement('div');
+            container.className = "flex flex-col gap-2 w-full";
+
+            q.steps.forEach((stepText, idx) => {
+                container.innerHTML += `
+                    <div class="bg-white p-3 rounded-xl border-2 border-purple-200 flex items-center space-x-3">
+                        <div class="w-7 h-7 bg-purple-600 text-white font-black rounded-full flex items-center justify-center text-sm flex-shrink-0">
+                            ${idx + 1}
+                        </div>
+                        <div class="text-purple-950 font-bold text-sm md:text-base">${stepText}</div>
+                    </div>
+                `;
+            });
+
+            return container;
+        }
+
+        function retryCurrentQuestion() {
+            document.getElementById('explanationModal').classList.add('hidden');
+            renderQuestion();
+        }
+
+        function showVictoryScreen() {
+            playSound('correct');
+            document.getElementById('finalScore').innerText = score;
+            
+            const badge = document.getElementById('finalBadge');
+            if (score >= 90) {
+                badge.innerText = '小數點特級大師 🏆🌟';
+            } else if (score >= 70) {
+                badge.innerText = '小數點冒險專家 ⭐';
+            } else {
+                badge.innerText = '小數點學習勇者 👍';
+            }
+
+            document.getElementById('victoryModal').classList.remove('hidden');
+            speakText("恭喜你完成所有小數除法題目！你太優秀了！");
+        }
+
+        function restartGame() {
+            currentQuestionIndex = 0;
+            score = 0;
+            document.getElementById('victoryModal').classList.add('hidden');
+            renderQuestion();
+        }
+
+        window.onload = function() {
+            initCantoneseVoice();
+            renderQuestion();
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小六小數除法探險島（SEN專用版）</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Noto+Sans+HK:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans HK', 'Fredoka', sans-serif;
+            background-color: #f0fdf4;
+            user-select: none;
+        }
+        .font-rounded {
+            font-family: 'Fredoka', 'Noto Sans HK', sans-serif;
+        }
+        .btn-bounce:active {
+            transform: scale(0.95);
+        }
+        .card-shadow {
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+        }
+        .pulse-slow {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.95; transform: scale(1.02); }
+        }
+    </style>
+</head>
+<body class="min-h-screen text-slate-800 flex flex-col justify-between selection:bg-teal-200">
+
+    <!-- Top Header -->
+    <header class="bg-teal-600 text-white p-4 shadow-md border-b-4 border-teal-700">
+        <div class="max-w-4xl mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <span class="text-3xl">🏝️</span>
+                <h1 class="text-xl md:text-2xl font-bold tracking-wide">小數除法探險島</h1>
+            </div>
+            <div class="flex items-center space-x-2 bg-teal-800/60 px-3 py-1.5 rounded-full text-sm font-semibold">
+                <span>音效</span>
+                <button id="sound-toggle" onclick="toggleSound()" class="w-8 h-8 rounded-full bg-teal-500 hover:bg-teal-400 flex items-center justify-center transition">
+                    🔊
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="max-w-3xl mx-auto w-full p-4 my-auto">
+        
+        <!-- START SCREEN -->
+        <div id="screen-start" class="bg-white rounded-3xl p-6 md:p-8 card-shadow border-4 border-teal-100 text-center space-y-6">
+            <div class="space-y-2">
+                <span class="inline-block bg-teal-100 text-teal-800 text-xs md:text-sm font-bold px-3 py-1 rounded-full">適合香港小六數學科課程 · SEN適應設計</span>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-teal-700">歡迎來到小數除法大冒險！</h2>
+                <p class="text-slate-600 text-base md:text-lg">完成 15 道趣味題目，一步步提示陪你思考，收集滿滿星星！</p>
+            </div>
+
+            <!-- Avatar Selection -->
+            <div class="bg-amber-50 p-4 rounded-2xl border-2 border-amber-200">
+                <p class="font-bold text-amber-900 mb-3 text-base">請選擇你的探險隊長角色：</p>
+                <div class="flex justify-center gap-4" id="avatar-selector">
+                    <button onclick="selectAvatar('🐱', '聰明貓咪')" class="avatar-btn active p-3 bg-white border-4 border-amber-400 rounded-2xl text-4xl hover:scale-110 transition shadow-sm" data-avatar="🐱">🐱</button>
+                    <button onclick="selectAvatar('🐶', '勇敢小狗')" class="avatar-btn p-3 bg-white border-2 border-slate-200 rounded-2xl text-4xl hover:scale-110 transition shadow-sm" data-avatar="🐶">🐶</button>
+                    <button onclick="selectAvatar('🐰', '機智兔子')" class="avatar-btn p-3 bg-white border-2 border-slate-200 rounded-2xl text-4xl hover:scale-110 transition shadow-sm" data-avatar="🐰">🐰</button>
+                    <button onclick="selectAvatar('🦁', '自信小獅')" class="avatar-btn p-3 bg-white border-2 border-slate-200 rounded-2xl text-4xl hover:scale-110 transition shadow-sm" data-avatar="🦁">🦁</button>
+                </div>
+            </div>
+
+            <div class="space-y-3">
+                <button onclick="startGame()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-xl py-4 rounded-2xl shadow-lg border-b-4 border-emerald-700 transition btn-bounce">
+                    🚀 開始探險之旅
+                </button>
+            </div>
+        </div>
+
+        <!-- GAME SCREEN -->
+        <div id="screen-game" class="hidden space-y-4">
+            
+            <!-- Progress & Score Bar -->
+            <div class="bg-white p-4 rounded-2xl card-shadow border-2 border-teal-100 flex items-center justify-between gap-4">
+                <div class="flex items-center space-x-2">
+                    <span id="player-avatar-display" class="text-3xl">🐱</span>
+                    <div>
+                        <div class="text-xs text-slate-500 font-bold">進度</div>
+                        <div id="question-progress-text" class="text-sm font-extrabold text-teal-700">第 1 / 15 題</div>
+                    </div>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="flex-1 max-w-xs bg-slate-100 h-4 rounded-full overflow-hidden border border-slate-200">
+                    <div id="progress-bar-fill" class="bg-teal-500 h-full w-0 transition-all duration-300"></div>
+                </div>
+
+                <!-- Star Score -->
+                <div class="flex items-center space-x-1 bg-amber-50 px-3 py-1.5 rounded-full border border-amber-200">
+                    <span class="text-xl">⭐</span>
+                    <span id="score-display" class="font-extrabold text-amber-700 text-lg">0</span>
+                </div>
+            </div>
+
+            <!-- Question Card -->
+            <div class="bg-white rounded-3xl p-6 card-shadow border-4 border-teal-200 space-y-6">
+                
+                <!-- Category Tag & TTS Read Button -->
+                <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                    <span id="question-category" class="bg-teal-100 text-teal-800 text-xs md:text-sm font-bold px-3 py-1 rounded-full">
+                        小數除以整數
+                    </span>
+                    <button onclick="speakCurrentQuestion()" class="flex items-center space-x-1 bg-sky-100 hover:bg-sky-200 text-sky-800 text-xs font-bold px-3 py-1.5 rounded-xl transition">
+                        <span>🔊 語音朗讀</span>
+                    </button>
+                </div>
+
+                <!-- Main Question Text -->
+                <div class="text-center py-2">
+                    <h3 id="question-text" class="text-2xl md:text-3xl font-extrabold text-slate-800 leading-relaxed">
+                        計算 $4.8 \div 2 = ?$
+                    </h3>
+                </div>
+
+                <!-- Step-by-Step Hint Toggle Box -->
+                <div class="bg-amber-50 rounded-2xl p-4 border-2 border-amber-200 space-y-2">
+                    <div class="flex justify-between items-center">
+                        <span class="font-bold text-amber-900 flex items-center gap-1.5 text-sm md:text-base">
+                            💡 解題小錦囊
+                        </span>
+                        <button id="toggle-hint-btn" onclick="toggleHint()" class="text-xs bg-amber-200 hover:bg-amber-300 text-amber-900 font-bold px-3 py-1 rounded-lg transition">
+                            顯示提示
+                        </button>
+                    </div>
+                    <div id="hint-content" class="hidden text-sm md:text-base text-amber-800 pt-2 border-t border-amber-200/60 leading-relaxed">
+                        <!-- Hint populates dynamically -->
+                    </div>
+                </div>
+
+                <!-- Options Grid -->
+                <div id="options-container" class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2">
+                    <!-- Options buttons will be injected here -->
+                </div>
+
+            </div>
+        </div>
+
+        <!-- FEEDBACK OVERLAY MODAL -->
+        <div id="feedback-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+            <div class="bg-white max-w-md w-full rounded-3xl p-6 text-center space-y-4 card-shadow border-4 border-white animate-bounce-short">
+                <div id="feedback-icon" class="text-6xl">🎉</div>
+                <h3 id="feedback-title" class="text-2xl font-black text-slate-800">答對了！太厲害了！</h3>
+                <p id="feedback-explanation" class="text-slate-600 bg-slate-50 p-4 rounded-2xl text-left text-sm leading-relaxed border border-slate-200">
+                    詳細解題說明...
+                </p>
+                <button onclick="nextQuestion()" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-extrabold text-lg py-3 rounded-2xl shadow-md transition btn-bounce">
+                    下一題 ➡️
+                </button>
+            </div>
+        </div>
+
+        <!-- RESULT SCREEN -->
+        <div id="screen-result" class="hidden bg-white rounded-3xl p-6 md:p-8 card-shadow border-4 border-teal-200 text-center space-y-6">
+            <div class="space-y-2">
+                <div class="text-6xl">🏆</div>
+                <h2 class="text-3xl font-extrabold text-teal-700">探險成功！恭喜你！</h2>
+                <p class="text-slate-600 font-medium">你順利完成了所有小數除法關卡！</p>
+            </div>
+
+            <!-- Score Summary Card -->
+            <div class="bg-teal-50 p-6 rounded-2xl border-2 border-teal-200 max-w-md mx-auto space-y-3">
+                <div class="text-sm text-teal-800 font-bold">總成績結算</div>
+                <div class="flex justify-center items-center space-x-2 text-4xl font-extrabold text-teal-800">
+                    <span>⭐</span>
+                    <span id="final-score">0</span>
+                    <span class="text-xl text-teal-600">/ 15 題</span>
+                </div>
+                <div id="achievement-badge" class="inline-block bg-amber-400 text-amber-950 font-extrabold text-sm px-4 py-1.5 rounded-full shadow-sm">
+                    🏅 獲得稱號：小數除法小專家
+                </div>
+            </div>
+
+            <!-- Review Answer List -->
+            <div class="text-left max-w-xl mx-auto space-y-3">
+                <h4 class="font-bold text-slate-800 text-base">題目溫習總覽：</h4>
+                <div id="review-list" class="max-h-60 overflow-y-auto space-y-2 pr-1">
+                    <!-- Dynamic review items -->
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-col sm:flex-row gap-3 justify-center max-w-md mx-auto pt-2">
+                <button onclick="restartGame()" class="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold py-3 rounded-2xl shadow-md transition btn-bounce">
+                    🔄 重新挑戰
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Simple Footer -->
+    <footer class="text-center p-4 text-xs text-slate-500 font-medium">
+        小學數學（小六）小數除法單元練習 · 適合 SEN 學生學習適應
+    </footer>
+
+    <script>
+        // Game State Variables
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let selectedAvatar = '🐱';
+        let isSoundOn = true;
+        let userAnswers = [];
+
+        // Question Database (15 P6 HK Curriculum Decimal Division Questions adapted for SEN)
+        const questions = [
+            {
+                id: 1,
+                category: "小數除以整數",
+                question: "計算：4.8 ÷ 2 = ?",
+                options: ["2.4", "2.2", "2.8", "2.0"],
+                answer: "2.4",
+                hint: "💡 提示：<br>個位：4 ÷ 2 = 2<br>十分位：8 ÷ 2 = 4<br>將小數點放在中間 ➡️ 2.4",
+                explanation: "解法：把 4.8 看成 4 個一 和 8 個 0.1。分別除以 2，得 2 個一 和 4 個 0.1，即 2.4。"
+            },
+            {
+                id: 2,
+                category: "小數除以整數",
+                question: "計算：6.9 ÷ 3 = ?",
+                options: ["2.1", "2.3", "3.2", "2.6"],
+                answer: "2.3",
+                hint: "💡 提示：<br>6 ÷ 3 = 2<br>9 ÷ 3 = 3<br>答案小數點對齊 ➡️ 2.3",
+                explanation: "解法：6 ÷ 3 = 2，9 ÷ 3 = 3，結果為 2.3。"
+            },
+            {
+                id: 3,
+                category: "小數除以整數",
+                question: "計算：15.5 ÷ 5 = ?",
+                options: ["3.1", "3.5", "3.0", "2.5"],
+                answer: "3.1",
+                hint: "💡 提示：<br>15 ÷ 5 = 3<br>5 ÷ 5 = 1<br>組合起來就是 3.1",
+                explanation: "解法：15 個一除以 5 得 3，5 個 0.1 除以 5 得 0.1，合共 3.1。"
+            },
+            {
+                id: 4,
+                category: "小數除以整數",
+                question: "計算：8.4 ÷ 4 = ?",
+                options: ["2.4", "2.1", "4.2", "2.2"],
+                answer: "2.1",
+                hint: "💡 提示：<br>8 ÷ 4 = 2<br>4 ÷ 4 = 1<br>小數點對齊 ➡️ 2.1",
+                explanation: "解法：8.4 ÷ 4 = 2.1。"
+            },
+            {
+                id: 5,
+                category: "整數除法（商是小數）",
+                question: "計算：9 ÷ 2 = ?",
+                options: ["4.1", "4.5", "4.2", "5.0"],
+                answer: "4.5",
+                hint: "💡 提示：<br>9 ÷ 2 = 4 餘 1<br>剩下的 1 代表 10 個 0.1<br>10 ÷ 2 = 5，所以是 4.5",
+                explanation: "解法：9 ÷ 2，商數為 4，餘 1。補 0 繼續除：10 ÷ 2 = 5，答案為 4.5。"
+            },
+            {
+                id: 6,
+                category: "整數除法（商是小數）",
+                question: "計算：7 ÷ 5 = ?",
+                options: ["1.2", "1.4", "1.5", "2.1"],
+                answer: "1.4",
+                hint: "💡 提示：<br>7 ÷ 5 = 1 餘 2<br>把 2 看成 20 個 0.1<br>20 ÷ 5 = 4，所以是 1.4",
+                explanation: "解法：7 ÷ 5 = 1.4。"
+            },
+            {
+                id: 7,
+                category: "除以 10（小數點移位）",
+                question: "計算：36.4 ÷ 10 = ?",
+                options: ["364", "3.64", "0.364", "36.40"],
+                answer: "3.64",
+                hint: "💡 提示：<br>👈 除以 10 時，把小數點向「左」移動 1 位！<br>36.4 ➡️ 3.64",
+                explanation: "解法：除以 10，小數點向左移動一位，36.4 變成 3.64。"
+            },
+            {
+                id: 8,
+                category: "除以 100（小數點移位）",
+                question: "計算：250 ÷ 100 = ?",
+                options: ["25", "2.5", "0.25", "25.0"],
+                answer: "2.5",
+                hint: "💡 提示：<br>👈👈 除以 100 時，把小數點向「左」移動 2 位！<br>250. ➡️ 2.5",
+                explanation: "解法：250 ÷ 100 = 2.5。"
+            },
+            {
+                id: 9,
+                category: "除以 10（小數點移位）",
+                question: "計算：1.8 ÷ 10 = ?",
+                options: ["0.18", "18", "1.08", "0.018"],
+                answer: "0.18",
+                hint: "💡 提示：<br>👈 小數點向左移 1 位<br>前面要補 0：1.8 ➡️ 0.18",
+                explanation: "解法：1.8 ÷ 10，小數點左移一位得 0.18。"
+            },
+            {
+                id: 10,
+                category: "小數除以小數",
+                question: "計算：1.2 ÷ 0.3 = ?",
+                options: ["0.4", "4", "40", "0.04"],
+                answer: "4",
+                hint: "💡 提示：<br>兩邊同時乘 10，消去小數點：<br>12 ÷ 3 = 4",
+                explanation: "解法：把被除數和除數同時擴大 10 倍，變成 12 ÷ 3 = 4。"
+            },
+            {
+                id: 11,
+                category: "小數除以小數",
+                question: "計算：0.8 ÷ 0.4 = ?",
+                options: ["2", "0.2", "20", "0.02"],
+                answer: "2",
+                hint: "💡 提示：<br>兩邊同時乘 10：<br>8 ÷ 4 = 2",
+                explanation: "解法：0.8 ÷ 0.4 相當於 8 ÷ 4 = 2。"
+            },
+            {
+                id: 12,
+                category: "小數除以小數",
+                question: "計算：2.5 ÷ 0.5 = ?",
+                options: ["0.5", "5", "50", "0.05"],
+                answer: "5",
+                hint: "💡 提示：<br>兩邊同時乘 10：<br>25 ÷ 5 = 5",
+                explanation: "解法：2.5 ÷ 0.5 = 25 ÷ 5 = 5。"
+            },
+            {
+                id: 13,
+                category: "生活應用題",
+                question: "媽媽把 $12.6 平均分給 3 名小朋友，每人分得多少元？",
+                options: ["$4.2", "$4.0", "$3.8", "$4.5"],
+                answer: "$4.2",
+                hint: "💡 提示：<br>列式：12.6 ÷ 3<br>12 ÷ 3 = 4，6 ÷ 3 = 2 ➡️ 4.2 元",
+                explanation: "解法：12.6 ÷ 3 = 4.2 元。"
+            },
+            {
+                id: 14,
+                category: "生活應用題",
+                question: "一條繩子長 8.4 米，剪成每段長 0.7 米，共可剪成多少段？",
+                options: ["10 段", "12 段", "14 段", "8 段"],
+                answer: "12 段",
+                hint: "💡 提示：<br>列式：8.4 ÷ 0.7<br>同時擴大 10 倍變成：84 ÷ 7 = 12",
+                explanation: "解法：8.4 ÷ 0.7 = 84 ÷ 7 = 12 段。"
+            },
+            {
+                id: 15,
+                category: "四捨五入取近似值",
+                question: "計算 5.3 ÷ 2，答案取至小數點後一位（四捨五入）是多少？",
+                options: ["2.6", "2.7", "2.65", "3.0"],
+                answer: "2.7",
+                hint: "💡 提示：<br>1. 先計算：5.3 ÷ 2 = 2.65<br>2. 看百分位數字是 5（滿 5 進位）<br>3. 2.65 四捨五入成 2.7",
+                explanation: "解法：5.3 ÷ 2 = 2.65。百分位數是 5，向上進位，取至小數點後一位是 2.7。"
+            }
+        ];
+
+        // Web Audio API Audio Synthesizer (Zero External Dependencies)
+        function playTone(freq, duration, type = 'sine') {
+            if (!isSoundOn) return;
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch (e) {
+                console.log("Audio not supported");
+            }
+        }
+
+        function playCorrectSound() {
+            playTone(523.25, 0.15); // C5
+            setTimeout(() => playTone(659.25, 0.25), 100); // E5
+        }
+
+        function playWrongSound() {
+            playTone(220, 0.25, 'sawtooth'); // A3
+        }
+
+        function toggleSound() {
+            isSoundOn = !isSoundOn;
+            document.getElementById('sound-toggle').innerText = isSoundOn ? '🔊' : '🔇';
+        }
+
+        // Avatar Selection Handler
+        function selectAvatar(emoji, name) {
+            selectedAvatar = emoji;
+            document.querySelectorAll('.avatar-btn').forEach(btn => {
+                btn.classList.remove('active', 'border-amber-400', 'border-4');
+                btn.classList.add('border-2', 'border-slate-200');
+            });
+            const selectedBtn = document.querySelector(`[data-avatar="${emoji}"]`);
+            if (selectedBtn) {
+                selectedBtn.classList.add('active', 'border-amber-400', 'border-4');
+                selectedBtn.classList.remove('border-2', 'border-slate-200');
+            }
+        }
+
+        // Start Game
+        function startGame() {
+            currentQuestionIndex = 0;
+            score = 0;
+            userAnswers = [];
+            document.getElementById('player-avatar-display').innerText = selectedAvatar;
+            document.getElementById('screen-start').classList.add('hidden');
+            document.getElementById('screen-result').classList.add('hidden');
+            document.getElementById('screen-game').classList.remove('hidden');
+            loadQuestion();
+        }
+
+        // Load Question Data into UI
+        function loadQuestion() {
+            const q = questions[currentQuestionIndex];
+            
+            // Update Progress
+            document.getElementById('question-progress-text').innerText = `第 ${currentQuestionIndex + 1} / ${questions.length} 題`;
+            const progressPct = ((currentQuestionIndex) / questions.length) * 100;
+            document.getElementById('progress-bar-fill').style.width = `${progressPct}%`;
+            document.getElementById('score-display').innerText = score;
+
+            // Question Details
+            document.getElementById('question-category').innerText = q.category;
+            document.getElementById('question-text').innerText = q.question;
+
+            // Reset Hint
+            const hintContent = document.getElementById('hint-content');
+            hintContent.innerHTML = q.hint;
+            hintContent.classList.add('hidden');
+            document.getElementById('toggle-hint-btn').innerText = '顯示提示';
+
+            // Options Rendering
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+            
+            q.options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'w-full bg-slate-50 hover:bg-teal-50 hover:border-teal-400 border-2 border-slate-200 text-slate-800 font-extrabold text-xl py-4 px-4 rounded-2xl transition shadow-sm flex items-center justify-center btn-bounce';
+                btn.innerText = opt;
+                btn.onclick = () => checkAnswer(opt);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        // Toggle Hint Visibility
+        function toggleHint() {
+            const hintContent = document.getElementById('hint-content');
+            const btn = document.getElementById('toggle-hint-btn');
+            if (hintContent.classList.contains('hidden')) {
+                hintContent.classList.remove('hidden');
+                btn.innerText = '隱藏提示';
+            } else {
+                hintContent.classList.add('hidden');
+                btn.innerText = '顯示提示';
+            }
+        }
+
+        // Speech Synthesis for SEN accessibility
+        function speakCurrentQuestion() {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const q = questions[currentQuestionIndex];
+                const utterance = new SpeechSynthesisUtterance(q.question);
+                utterance.lang = 'zh-HK';
+                utterance.rate = 0.85; // slightly slower for clarity
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        // Check Answer Logic
+        function checkAnswer(selectedOpt) {
+            const q = questions[currentQuestionIndex];
+            const isCorrect = (selectedOpt === q.answer);
+
+            if (isCorrect) {
+                score++;
+                playCorrectSound();
+                document.getElementById('feedback-icon').innerText = '🎉';
+                document.getElementById('feedback-title').innerText = '答對了！太讚了！';
+                document.getElementById('feedback-title').className = 'text-2xl font-black text-emerald-600';
+            } else {
+                playWrongSound();
+                document.getElementById('feedback-icon').innerText = '💪';
+                document.getElementById('feedback-title').innerText = '再接再厲！';
+                document.getElementById('feedback-title').className = 'text-2xl font-black text-amber-600';
+            }
+
+            userAnswers.push({
+                question: q.question,
+                selected: selectedOpt,
+                correct: q.answer,
+                isCorrect: isCorrect,
+                explanation: q.explanation
+            });
+
+            document.getElementById('feedback-explanation').innerHTML = `
+                <div class="mb-2"><strong>正確答案：</strong> <span class="text-emerald-700 font-bold">${q.answer}</span></div>
+                <div>${q.explanation}</div>
+            `;
+
+            document.getElementById('feedback-modal').classList.remove('hidden');
+        }
+
+        // Next Question Handler
+        function nextQuestion() {
+            document.getElementById('feedback-modal').classList.add('hidden');
+            currentQuestionIndex++;
+            
+            if (currentQuestionIndex < questions.length) {
+                loadQuestion();
+            } else {
+                showResult();
+            }
+        }
+
+        // Show Final Result Screen
+        function showResult() {
+            document.getElementById('screen-game').classList.add('hidden');
+            document.getElementById('screen-result').classList.remove('hidden');
+
+            document.getElementById('final-score').innerText = score;
+
+            // Assign Praise Badge based on performance
+            const badgeEl = document.getElementById('achievement-badge');
+            if (score === 15) {
+                badgeEl.innerText = '🏆 榮獲稱號：小數除法大宗師';
+            } else if (score >= 11) {
+                badgeEl.innerText = '🏅 榮獲稱號：小數除法小專家';
+            } else if (score >= 7) {
+                badgeEl.innerText = '🌟 榮獲稱號：持之以恆探索者';
+            } else {
+                badgeEl.innerText = '💪 榮獲稱號：努力不懈學習星';
+            }
+
+            // Render Review List
+            const reviewList = document.getElementById('review-list');
+            reviewList.innerHTML = '';
+            
+            userAnswers.forEach((ans, idx) => {
+                const item = document.createElement('div');
+                item.className = `p-3 rounded-xl border text-xs md:text-sm ${ans.isCorrect ? 'bg-emerald-50 border-emerald-200' : 'bg-rose-50 border-rose-200'}`;
+                item.innerHTML = `
+                    <div class="font-bold flex justify-between items-center">
+                        <span>${idx + 1}. ${ans.question}</span>
+                        <span>${ans.isCorrect ? '✅ 答對' : '❌ 答錯'}</span>
+                    </div>
+                    <div class="text-slate-600 mt-1">
+                        你的答案：<span class="${ans.isCorrect ? 'text-emerald-700 font-bold' : 'text-rose-600 font-bold'}">${ans.selected}</span> 
+                        | 正確答案：<span class="text-emerald-700 font-bold">${ans.correct}</span>
+                    </div>
+                `;
+                reviewList.appendChild(item);
+            });
+        }
+
+        // Restart Game
+        function restartGame() {
+            document.getElementById('screen-result').classList.add('hidden');
+            document.getElementById('screen-start').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小六小數除法大冒險 - SEN 專用學習網頁</title>
+    <!-- Tailwind CSS for Responsive SEN-friendly styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+HK:wght@500;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans HK', sans-serif;
+            background-color: #F0FDF4; /* Soft pastel green background for focus */
+            user-select: none;
+        }
+        .pulse-slow {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+        }
+        .shake {
+            animation: shake 0.4s ease-in-out;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-8px); }
+            40%, 80% { transform: translateX(8px); }
+        }
+        /* Custom Place Value Table Borders */
+        .pv-cell {
+            border: 2px solid #CBD5E1;
+            padding: 8px 4px;
+            text-align: center;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body class="min-h-screen text-slate-800 flex flex-col justify-between p-2 md:p-6">
+
+    <!-- Top Bar / Header -->
+    <header class="max-w-4xl mx-auto w-full bg-white rounded-3xl shadow-lg p-4 mb-4 border-4 border-amber-300 flex flex-wrap justify-between items-center gap-3">
+        <div class="flex items-center gap-3">
+            <span class="text-3xl md:text-4xl">🌟</span>
+            <div>
+                <h1 class="text-xl md:text-2xl font-black text-emerald-700">小數除法大冒險</h1>
+                <p class="text-xs md:text-sm font-bold text-slate-500" id="level-badge">關卡一：基礎移動小數點 (1-10題)</p>
+            </div>
+        </div>
+
+        <!-- Score, Combo and Sound Controls -->
+        <div class="flex items-center gap-3 ms-auto">
+            <div class="bg-amber-100 border-2 border-amber-400 px-3 py-1.5 rounded-2xl text-center">
+                <span class="text-xs text-amber-800 font-bold block">得分</span>
+                <span id="score-text" class="text-xl font-black text-amber-600">0</span>
+            </div>
+            <div class="bg-orange-100 border-2 border-orange-400 px-3 py-1.5 rounded-2xl text-center">
+                <span class="text-xs text-orange-800 font-bold block">Combo</span>
+                <span id="combo-text" class="text-xl font-black text-orange-600">x0</span>
+            </div>
+            <button id="btn-sound" onclick="toggleSound()" class="bg-sky-100 hover:bg-sky-200 border-2 border-sky-400 p-2.5 rounded-2xl text-xl transition" title="聲音切換">
+                🔊
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Interactive Area -->
+    <main class="max-w-4xl mx-auto w-full flex-grow flex flex-col justify-center">
+        <!-- Progress Bar -->
+        <div class="w-full bg-slate-200 rounded-full h-5 mb-4 overflow-hidden border-2 border-slate-300">
+            <div id="progress-bar" class="bg-emerald-500 h-full w-0 transition-all duration-300"></div>
+        </div>
+
+        <!-- Question Box Container -->
+        <div id="quiz-card" class="bg-white rounded-3xl shadow-xl p-5 md:p-8 border-4 border-sky-200 relative">
+            
+            <!-- Question Header -->
+            <div class="flex justify-between items-center mb-4">
+                <span id="question-number" class="bg-sky-500 text-white font-black text-sm md:text-base px-4 py-1.5 rounded-full">
+                    第 1 / 20 題
+                </span>
+                
+                <!-- Audio Read Button -->
+                <button onclick="readCurrentQuestion()" class="bg-amber-400 hover:bg-amber-500 active:scale-95 text-slate-900 font-black px-4 py-2 rounded-2xl shadow-md flex items-center gap-2 text-sm md:text-base transition">
+                    <span>🔊 廣東話朗讀題目</span>
+                </button>
+            </div>
+
+            <!-- Question Text -->
+            <div class="bg-sky-50 rounded-2xl p-6 border-2 border-sky-200 mb-6 text-center">
+                <h2 id="question-text" class="text-2xl md:text-4xl font-black text-slate-800 tracking-wide leading-relaxed">
+                    4 ÷ 100 = ?
+                </h2>
+                <p id="question-subtext" class="text-slate-500 font-bold text-sm md:text-base mt-2 hidden">
+                    請選出正確的答案：
+                </p>
+            </div>
+
+            <!-- Options Grid (4 Large SEN friendly targets) -->
+            <div id="options-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Option buttons generated dynamically -->
+            </div>
+
+        </div>
+
+        <!-- Visual Assistance Modal / Section (Shown on wrong answer) -->
+        <div id="visual-modal" class="hidden bg-white rounded-3xl shadow-2xl p-5 md:p-8 border-4 border-rose-300 mt-4">
+            <div class="flex items-center gap-3 mb-3 text-rose-600">
+                <span class="text-3xl">💡</span>
+                <h3 class="text-xl md:text-2xl font-black">小解說：一起看看小數點怎樣移動！</h3>
+            </div>
+
+            <p id="explanation-text" class="text-base md:text-lg text-slate-700 font-bold mb-4 bg-amber-50 p-3 rounded-xl border border-amber-200">
+                <!-- Dynamic explanation text -->
+            </p>
+
+            <!-- Dynamic Place Value Table (數值位表) -->
+            <div class="overflow-x-auto mb-4">
+                <table class="w-full text-xs md:text-sm border-collapse bg-white rounded-xl shadow-sm">
+                    <thead>
+                        <tr class="bg-slate-100 text-slate-700">
+                            <th class="pv-cell bg-slate-200">數值位</th>
+                            <th class="pv-cell">百位<br>(100)</th>
+                            <th class="pv-cell">十位<br>(10)</th>
+                            <th class="pv-cell">個位<br>(1)</th>
+                            <th class="pv-cell bg-amber-200 text-amber-900">.</th>
+                            <th class="pv-cell">十分位<br>(0.1)</th>
+                            <th class="pv-cell">百分位<br>(0.01)</th>
+                            <th class="pv-cell">千分位<br>(0.001)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pv-table-body">
+                        <!-- Dynamic row rendered in JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Dynamic Shift Indicator Arrow Graphic -->
+            <div id="arrow-graphic" class="bg-emerald-50 border-2 border-emerald-200 rounded-2xl p-4 text-center mb-5">
+                <!-- Visual arrow guidance generated here -->
+            </div>
+
+            <!-- Buttons in modal -->
+            <div class="flex flex-wrap gap-3 justify-end">
+                <button onclick="readExplanation()" class="bg-sky-400 hover:bg-sky-500 text-white font-bold px-4 py-2.5 rounded-xl shadow transition flex items-center gap-2">
+                    🔊 聽解題語音
+                </button>
+                <button onclick="nextQuestion()" class="bg-emerald-500 hover:bg-emerald-600 text-white font-black text-lg px-6 py-2.5 rounded-xl shadow-lg transition transform active:scale-95">
+                    理解了，繼續下一題 ➔
+                </button>
+            </div>
+        </div>
+
+        <!-- Results Screen -->
+        <div id="results-screen" class="hidden bg-white rounded-3xl shadow-2xl p-6 md:p-10 border-4 border-amber-400 text-center">
+            <span class="text-6xl md:text-7xl mb-2 block">🏆</span>
+            <h2 class="text-2xl md:text-4xl font-black text-amber-600 mb-2">冒險完成！太棒了！</h2>
+            <p class="text-slate-600 font-bold mb-6 text-base md:text-lg">你完成了全部 20 道小數除法題目！</p>
+
+            <!-- Star Rating -->
+            <div id="stars-container" class="text-5xl md:text-6xl mb-6">
+                ⭐⭐⭐
+            </div>
+
+            <div class="bg-amber-50 rounded-2xl p-6 border-2 border-amber-200 max-w-md mx-auto mb-8 space-y-3">
+                <div class="flex justify-between text-lg font-bold">
+                    <span class="text-slate-600">最終得分：</span>
+                    <span id="final-score" class="text-amber-600 font-black text-2xl">0</span>
+                </div>
+                <div class="flex justify-between text-lg font-bold">
+                    <span class="text-slate-600">答對題數：</span>
+                    <span id="final-correct" class="text-emerald-600 font-black text-2xl">0 / 20</span>
+                </div>
+                <p id="final-eval" class="text-emerald-700 font-black text-lg pt-2 border-t border-amber-200">
+                    靈敏的小腦袋，你掌握了移動小數點的魔法！
+                </p>
+            </div>
+
+            <button onclick="restartGame()" class="bg-emerald-500 hover:bg-emerald-600 text-white text-xl font-black px-8 py-4 rounded-2xl shadow-xl transition transform active:scale-95 pulse-slow">
+                🔄 再玩一次
+            </button>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-center text-xs md:text-sm text-slate-500 font-bold mt-6 py-2">
+        香港小學六年級數學科 - 特殊教育需要 (SEN) 輔助教學網頁工具
+    </footer>
+
+    <script>
+        // Audio Context for synthesized sound effects (No external MP3 files needed)
+        let audioCtx = null;
+        let soundEnabled = true;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playSound(type) {
+            if (!soundEnabled) return;
+            initAudio();
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            const now = audioCtx.currentTime;
+
+            if (type === 'correct') {
+                // Happy high chord (C5, E5, G5, C6)
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(523.25, now); // C5
+                osc.frequency.setValueAtTime(659.25, now + 0.1); // E5
+                osc.frequency.setValueAtTime(783.99, now + 0.2); // G5
+                osc.frequency.setValueAtTime(1046.50, now + 0.3); // C6
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+                osc.start(now);
+                osc.stop(now + 0.6);
+            } else if (type === 'wrong') {
+                // Low gentle error sound
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(220, now); // A3
+                osc.frequency.setValueAtTime(164.81, now + 0.15); // E3
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+                osc.start(now);
+                osc.stop(now + 0.4);
+            } else if (type === 'click') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(400, now);
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+                osc.start(now);
+                osc.stop(now + 0.08);
+            } else if (type === 'win') {
+                // Fanfare
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(523.25, now);
+                osc.frequency.setValueAtTime(659.25, now + 0.15);
+                osc.frequency.setValueAtTime(783.99, now + 0.3);
+                osc.frequency.setValueAtTime(1046.50, now + 0.45);
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.9);
+                osc.start(now);
+                osc.stop(now + 0.9);
+            }
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const btn = document.getElementById('btn-sound');
+            btn.innerHTML = soundEnabled ? '🔊' : '🔇';
+            if (!soundEnabled) window.speechSynthesis.cancel();
+        }
+
+        // Question Data Array (20 HK Curriculum P6 Decimal Division Questions)
+        const questions = [
+            // --- 初階 (1-10) ---
+            {
+                id: 1,
+                text: "4 ÷ 100 = ?",
+                speakText: "第四除以一百等於幾多？",
+                options: ["0.04", "0.4", "400", "0.004"],
+                answer: 0,
+                explanation: "4 除以 100：除數是 100 (有 2 個 0)，小數點要向【左】移動 2 位！",
+                initialNum: "4.0",
+                shiftDirection: "left",
+                shiftPlaces: 2,
+                resultNum: "0.04"
+            },
+            {
+                id: 2,
+                text: "2.5 ÷ 0.1 = ?",
+                speakText: "二點五除以零點一等於幾多？",
+                options: ["25", "0.25", "250", "0.025"],
+                answer: 0,
+                explanation: "2.5 除以 0.1：除數是 0.1 (1 個小數位)，小數點要向【右】移動 1 位！",
+                initialNum: "2.5",
+                shiftDirection: "right",
+                shiftPlaces: 1,
+                resultNum: "25"
+            },
+            {
+                id: 3,
+                text: "97 ÷ 10 = ?",
+                speakText: "九十七除以十等於幾多？",
+                options: ["9.7", "0.97", "970", "0.097"],
+                answer: 0,
+                explanation: "97 除以 10：除數是 10 (有 1 個 0)，小數點要向【左】移動 1 位！",
+                initialNum: "97.0",
+                shiftDirection: "left",
+                shiftPlaces: 1,
+                resultNum: "9.7"
+            },
+            {
+                id: 4,
+                text: "5.2 ÷ 0.01 = ?",
+                speakText: "五點二除以零點零一等於幾多？",
+                options: ["520", "52", "0.052", "5200"],
+                answer: 0,
+                explanation: "5.2 除以 0.01：除數是 0.01 (2 個小數位)，小數點要向【右】移動 2 位！",
+                initialNum: "5.2",
+                shiftDirection: "right",
+                shiftPlaces: 2,
+                resultNum: "520"
+            },
+            {
+                id: 5,
+                text: "0.38 ÷ 100 = ?",
+                speakText: "零點三八除以一百等於幾多？",
+                options: ["0.0038", "0.038", "38", "0.38"],
+                answer: 0,
+                explanation: "0.38 除以 100：除數是 100，小數點要向【左】移動 2 位！",
+                initialNum: "0.38",
+                shiftDirection: "left",
+                shiftPlaces: 2,
+                resultNum: "0.0038"
+            },
+            {
+                id: 6,
+                text: "1.94 ÷ 0.1 = ?",
+                speakText: "一點九四除以零點一等於幾多？",
+                options: ["19.4", "0.194", "194", "1.94"],
+                answer: 0,
+                explanation: "1.94 除以 0.1：除數是 0.1，小數點要向【右】移動 1 位！",
+                initialNum: "1.94",
+                shiftDirection: "right",
+                shiftPlaces: 1,
+                resultNum: "19.4"
+            },
+            {
+                id: 7,
+                text: "730 ÷ 1000 = ?",
+                speakText: "七百三十除以一千等於幾多？",
+                options: ["0.73", "7.3", "0.073", "73"],
+                answer: 0,
+                explanation: "730 除以 1000：除數是 1000 (3 個 0)，小數點要向【左】移動 3 位！",
+                initialNum: "730.0",
+                shiftDirection: "left",
+                shiftPlaces: 3,
+                resultNum: "0.73"
+            },
+            {
+                id: 8,
+                text: "91 ÷ 0.01 = ?",
+                speakText: "九十一除以零點零一等於幾多？",
+                options: ["9100", "910", "0.91", "9.1"],
+                answer: 0,
+                explanation: "91 除以 0.01：除數是 0.01，小數點要向【右】移動 2 位！",
+                initialNum: "91.0",
+                shiftDirection: "right",
+                shiftPlaces: 2,
+                resultNum: "9100"
+            },
+            {
+                id: 9,
+                text: "24 ÷ 1000 = ?",
+                speakText: "二十四除以一千等於幾多？",
+                options: ["0.024", "0.24", "2.4", "0.0024"],
+                answer: 0,
+                explanation: "24 除以 1000：除數是 1000，小數點要向【左】移動 3 位！",
+                initialNum: "24.0",
+                shiftDirection: "left",
+                shiftPlaces: 3,
+                resultNum: "0.024"
+            },
+            {
+                id: 10,
+                text: "0.005 ÷ 0.01 = ?",
+                speakText: "零點零零五除以零點零一等於幾多？",
+                options: ["0.5", "0.05", "5", "0.0005"],
+                answer: 0,
+                explanation: "0.005 除以 0.01：除數是 0.01，小數點要向【右】移動 2 位！",
+                initialNum: "0.005",
+                shiftDirection: "right",
+                shiftPlaces: 2,
+                resultNum: "0.5"
+            },
+
+            // --- 進階 (11-20) ---
+            {
+                id: 11,
+                text: "6 ÷ ? = 0.006",
+                speakText: "六除以幾多會等於零點零零六？",
+                options: ["1000", "100", "10", "0.001"],
+                answer: 0,
+                explanation: "6 變成 0.006，小數點向左移動了 3 位 (6 ➔ 0.6 ➔ 0.06 ➔ 0.006)，所以除數是 1000！",
+                initialNum: "6.0",
+                shiftDirection: "left",
+                shiftPlaces: 3,
+                resultNum: "0.006"
+            },
+            {
+                id: 12,
+                text: "0.74 ÷ ? = 7.4",
+                speakText: "零點七四除以幾多會等於七點四？",
+                options: ["0.1", "10", "0.01", "100"],
+                answer: 0,
+                explanation: "0.74 變成 7.4，小數點向右移動了 1 位，所以除數是 0.1！",
+                initialNum: "0.74",
+                shiftDirection: "right",
+                shiftPlaces: 1,
+                resultNum: "7.4"
+            },
+            {
+                id: 13,
+                text: "? ÷ 0.001 = 2.9",
+                speakText: "幾多除以零點零零一等於二點九？",
+                options: ["0.0029", "2900", "0.029", "2.9"],
+                answer: 0,
+                explanation: "除以 0.001 會向右移 3 位變成 2.9。逆向思考：把 2.9 向左移動 3 位，答案是 0.0029！",
+                initialNum: "0.0029",
+                shiftDirection: "right",
+                shiftPlaces: 3,
+                resultNum: "2.9"
+            },
+            {
+                id: 14,
+                text: "53.2 ÷ ? = 5.32",
+                speakText: "五十三點二除以幾多等於五點三二？",
+                options: ["10", "100", "0.1", "0.01"],
+                answer: 0,
+                explanation: "53.2 變成 5.32，小數點向左移動了 1 位，所以除數是 10！",
+                initialNum: "53.2",
+                shiftDirection: "left",
+                shiftPlaces: 1,
+                resultNum: "5.32"
+            },
+            {
+                id: 15,
+                text: "91.8 ÷ 100 ÷ 0.1 = ?",
+                speakText: "九十一點八除以一百，再除以零點一，結果係幾多？",
+                options: ["9.18", "0.918", "91.8", "0.0918"],
+                answer: 0,
+                explanation: "分兩步計算：① 91.8 ÷ 100 = 0.918 (左移2位)；② 0.918 ÷ 0.1 = 9.18 (右移1位)！",
+                initialNum: "91.8",
+                shiftDirection: "both",
+                shiftPlaces: 0,
+                resultNum: "9.18"
+            },
+            {
+                id: 16,
+                text: "8 ÷ 0.01 ÷ 1000 = ?",
+                speakText: "八除以零點零一，再除以一千，結果係幾多？",
+                options: ["0.8", "8", "80", "0.08"],
+                answer: 0,
+                explanation: "分兩步計算：① 8 ÷ 0.01 = 800 (右移2位)；② 800 ÷ 1000 = 0.8 (左移3位)！",
+                initialNum: "8.0",
+                shiftDirection: "both",
+                shiftPlaces: 0,
+                resultNum: "0.8"
+            },
+            {
+                id: 17,
+                text: "以下哪道算式的結果最小？",
+                speakText: "以下邊一道算式嘅結果係最小？",
+                options: [
+                    "D. 3.15 ÷ 1000 (= 0.00315)",
+                    "A. 3.15 ÷ 0.01 (= 315)",
+                    "B. 3.15 ÷ 100 (= 0.0315)",
+                    "C. 3.15 ÷ 0.001 (= 3150)"
+                ],
+                answer: 0,
+                explanation: "解題小秘訣：被除數相同時，除數越大，商便越小！1000 是最大的除數，所以 3.15 ÷ 1000 結果最小。",
+                initialNum: "3.15",
+                shiftDirection: "left",
+                shiftPlaces: 3,
+                resultNum: "0.00315"
+            },
+            {
+                id: 18,
+                text: "以下哪道算式的結果與其他不同？",
+                speakText: "以下邊一道算式嘅結果同其他唔同？",
+                options: [
+                    "B. 72.6 ÷ 100 (= 0.726)",
+                    "A. 726 ÷ 10 (= 72.6)",
+                    "C. 7.26 ÷ 0.1 (= 72.6)",
+                    "D. 0.726 ÷ 0.01 (= 72.6)"
+                ],
+                answer: 0,
+                explanation: "算一算：A=72.6, B=0.726, C=72.6, D=72.6。選項 B 的答案是 0.726，與其他三個都不同！",
+                initialNum: "72.6",
+                shiftDirection: "left",
+                shiftPlaces: 2,
+                resultNum: "0.726"
+            },
+            {
+                id: 19,
+                text: "以下哪道算式的結果大於 1？",
+                speakText: "以下邊一道算式嘅結果係大於一？",
+                options: [
+                    "A. 0.54 ÷ 0.1 (= 5.4)",
+                    "B. 54 ÷ 100 (= 0.54)",
+                    "C. 0.54 ÷ 10 (= 0.054)",
+                    "D. 0.0054 ÷ 0.01 (= 0.54)"
+                ],
+                answer: 0,
+                explanation: "解題小秘訣：當被除數比除數大時，結果就會大於 1！0.54 比 0.1 大，所以 0.54 ÷ 0.1 = 5.4 > 1。",
+                initialNum: "0.54",
+                shiftDirection: "right",
+                shiftPlaces: 1,
+                resultNum: "5.4"
+            },
+            {
+                id: 20,
+                text: "最小的兩位奇數除以 1000 的商是多少？",
+                speakText: "最小嘅兩位奇數除以一千嘅商係幾多？",
+                options: [
+                    "A. 0.011",
+                    "B. 0.099",
+                    "C. 11000",
+                    "D. 99000"
+                ],
+                answer: 0,
+                explanation: "最小的兩位奇數是 11。11 ÷ 1000：小數點向左移動 3 位 ➔ 0.011！",
+                initialNum: "11.0",
+                shiftDirection: "left",
+                shiftPlaces: 3,
+                resultNum: "0.011"
+            }
+        ];
+
+        let currentQuestionIdx = 0;
+        let score = 0;
+        let combo = 0;
+        let correctAnswersCount = 0;
+
+        // Shuffle Options for each question to avoid predictable fixed positions
+        function getShuffledOptions(question) {
+            let optionsWithOrigIndex = question.options.map((opt, idx) => ({ text: opt, isCorrect: idx === question.answer }));
+            // Fisher-Yates shuffle
+            for (let i = optionsWithOrigIndex.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [optionsWithOrigIndex[i], optionsWithOrigIndex[j]] = [optionsWithOrigIndex[j], optionsWithOrigIndex[i]];
+            }
+            return optionsWithOrigIndex;
+        }
+
+        let currentShuffledOptions = [];
+
+        function loadQuestion() {
+            // Hide modal if open
+            document.getElementById('visual-modal').classList.add('hidden');
+            
+            const q = questions[currentQuestionIdx];
+            
+            // Update Level Header Badge
+            const levelBadge = document.getElementById('level-badge');
+            if (currentQuestionIdx < 10) {
+                levelBadge.innerText = "關卡一：基礎移動小數點 (1-10題)";
+                levelBadge.className = "text-xs md:text-sm font-bold text-sky-700 bg-sky-100 px-3 py-1 rounded-full border border-sky-300";
+            } else {
+                levelBadge.innerText = "關卡二：進階填空與比較 (11-20題)";
+                levelBadge.className = "text-xs md:text-sm font-bold text-purple-700 bg-purple-100 px-3 py-1 rounded-full border border-purple-300";
+            }
+
+            // Update Progress Bar & Question Count
+            document.getElementById('question-number').innerText = `第 ${currentQuestionIdx + 1} / ${questions.length} 題`;
+            const progressPercent = ((currentQuestionIdx + 1) / questions.length) * 100;
+            document.getElementById('progress-bar').style.width = `${progressPercent}%`;
+
+            // Set Question Text
+            document.getElementById('question-text').innerText = q.text;
+
+            // Generate Option Buttons
+            currentShuffledOptions = getShuffledOptions(q);
+            const container = document.getElementById('options-container');
+            container.innerHTML = '';
+
+            const optionColors = [
+                "bg-amber-100 border-amber-300 hover:bg-amber-200 text-amber-900",
+                "bg-sky-100 border-sky-300 hover:bg-sky-200 text-sky-900",
+                "bg-emerald-100 border-emerald-300 hover:bg-emerald-200 text-emerald-900",
+                "bg-rose-100 border-rose-300 hover:bg-rose-200 text-rose-900"
+            ];
+
+            currentShuffledOptions.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = `w-full text-left font-black text-xl md:text-2xl p-5 md:p-6 rounded-2xl border-4 transition transform active:scale-95 shadow-md flex items-center gap-3 ${optionColors[idx % 4]}`;
+                btn.onclick = () => checkAnswer(opt.isCorrect, btn);
+                btn.innerHTML = `<span class="bg-white/80 w-10 h-10 rounded-xl inline-flex items-center justify-center border border-black/10 text-lg">${['A','B','C','D'][idx]}</span> <span>${opt.text}</span>`;
+                container.appendChild(btn);
+            });
+
+            // Automatically read question text for Cantonese Speech support
+            readCurrentQuestion();
+        }
+
+        function checkAnswer(isCorrect, buttonElem) {
+            playSound('click');
+            const q = questions[currentQuestionIdx];
+
+            // Disable option buttons during feedback
+            const buttons = document.querySelectorAll('#options-container button');
+            buttons.forEach(b => b.disabled = true);
+
+            if (isCorrect) {
+                playSound('correct');
+                buttonElem.classList.remove('bg-amber-100', 'bg-sky-100', 'bg-emerald-100', 'bg-rose-100');
+                buttonElem.classList.add('bg-emerald-500', 'text-white', 'border-emerald-600', 'pulse-slow');
+
+                combo++;
+                score += 100 + (combo * 20);
+                correctAnswersCount++;
+
+                document.getElementById('score-text').innerText = score;
+                document.getElementById('combo-text').innerText = `x${combo}`;
+
+                setTimeout(() => {
+                    currentQuestionIdx++;
+                    if (currentQuestionIdx < questions.length) {
+                        loadQuestion();
+                    } else {
+                        showResults();
+                    }
+                }, 1200);
+
+            } else {
+                playSound('wrong');
+                buttonElem.classList.add('bg-rose-500', 'text-white', 'border-rose-700', 'shake');
+                combo = 0;
+                document.getElementById('combo-text').innerText = `x0`;
+
+                // Highlight correct answer button
+                buttons.forEach((btn, idx) => {
+                    if (currentShuffledOptions[idx].isCorrect) {
+                        btn.classList.add('ring-4', 'ring-emerald-400');
+                    }
+                });
+
+                // Show Place-Value Visual Explanation Modal
+                setTimeout(() => {
+                    renderVisualExplanation(q);
+                }, 800);
+            }
+        }
+
+        function renderVisualExplanation(q) {
+            const modal = document.getElementById('visual-modal');
+            modal.classList.remove('hidden');
+
+            document.getElementById('explanation-text').innerText = q.explanation;
+
+            // Build Place Value Table Row
+            const tbody = document.getElementById('pv-table-body');
+            tbody.innerHTML = '';
+
+            // Example place value positions mapping
+            // 百位, 十位, 個位, ., 十分位, 百分位, 千分位
+            let initialRow = `<tr class="font-black text-base md:text-lg text-slate-800">
+                <td class="pv-cell bg-slate-100 text-xs text-slate-500">數值變化</td>
+                <td class="pv-cell">${extractDigit(q.initialNum, 100)}</td>
+                <td class="pv-cell">${extractDigit(q.initialNum, 10)}</td>
+                <td class="pv-cell">${extractDigit(q.initialNum, 1)}</td>
+                <td class="pv-cell bg-amber-100 text-amber-900 font-bold">.</td>
+                <td class="pv-cell">${extractDigit(q.initialNum, 0.1)}</td>
+                <td class="pv-cell">${extractDigit(q.initialNum, 0.01)}</td>
+                <td class="pv-cell">${extractDigit(q.initialNum, 0.001)}</td>
+            </tr>`;
+
+            tbody.innerHTML = initialRow;
+
+            // Render Animated Shift Arrow Graphic
+            const arrowGraphic = document.getElementById('arrow-graphic');
+            let arrowHTML = '';
+
+            if (q.shiftDirection === 'left') {
+                arrowHTML = `
+                    <div class="flex items-center justify-center gap-2 text-rose-600 font-black text-lg md:text-xl">
+                        <span>${q.initialNum}</span>
+                        <span class="text-2xl animate-pulse">👈 向左移動 ${q.shiftPlaces} 位</span>
+                        <span class="bg-emerald-600 text-white px-3 py-1 rounded-xl">${q.resultNum}</span>
+                    </div>
+                    <p class="text-xs md:text-sm text-slate-600 font-bold mt-2">（除以 10 / 100 / 1000 ➔ 數字變小，小數點向左移）</p>
+                `;
+            } else if (q.shiftDirection === 'right') {
+                arrowHTML = `
+                    <div class="flex items-center justify-center gap-2 text-emerald-600 font-black text-lg md:text-xl">
+                        <span>${q.initialNum}</span>
+                        <span class="text-2xl animate-pulse">向右移動 ${q.shiftPlaces} 位 👉</span>
+                        <span class="bg-emerald-600 text-white px-3 py-1 rounded-xl">${q.resultNum}</span>
+                    </div>
+                    <p class="text-xs md:text-sm text-slate-600 font-bold mt-2">（除以 0.1 / 0.01 / 0.001 ➔ 數字變大，小數點向右移）</p>
+                `;
+            } else {
+                arrowHTML = `
+                    <div class="flex items-center justify-center gap-2 text-purple-700 font-black text-lg md:text-xl">
+                        <span>綜合計算結果 ➔ </span>
+                        <span class="bg-purple-600 text-white px-4 py-1.5 rounded-xl text-2xl">${q.resultNum}</span>
+                    </div>
+                `;
+            }
+
+            arrowGraphic.innerHTML = arrowHTML;
+
+            // Read explanation voice automatically
+            readExplanation();
+        }
+
+        // Helper to extract digit for place value visualization
+        function extractDigit(numStr, place) {
+            const val = parseFloat(numStr);
+            if (isNaN(val)) return "-";
+            
+            if (place === 100) {
+                let d = Math.floor((val % 1000) / 100);
+                return d > 0 ? d : "-";
+            }
+            if (place === 10) {
+                let d = Math.floor((val % 100) / 10);
+                return (d > 0 || val >= 100) ? d : "-";
+            }
+            if (place === 1) {
+                let d = Math.floor(val % 10);
+                return d;
+            }
+            
+            // Decimals
+            let decimals = numStr.split('.')[1] || "";
+            if (place === 0.1) return decimals[0] || "0";
+            if (place === 0.01) return decimals[1] || "0";
+            if (place === 0.001) return decimals[2] || "0";
+
+            return "-";
+        }
+
+        function nextQuestion() {
+            playSound('click');
+            currentQuestionIdx++;
+            if (currentQuestionIdx < questions.length) {
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function readCurrentQuestion() {
+            if (!soundEnabled) return;
+            const q = questions[currentQuestionIdx];
+            speakCantonese(q.speakText || q.text);
+        }
+
+        function readExplanation() {
+            if (!soundEnabled) return;
+            const q = questions[currentQuestionIdx];
+            speakCantonese(q.explanation);
+        }
+
+        function speakCantonese(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel(); // Stop active speech
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'zh-HK'; // Cantonese Hong Kong
+                utterance.rate = 0.85; // SEN Friendly slightly slower speech rate
+                utterance.pitch = 1.0;
+
+                // Select Hong Kong voice if available
+                const voices = window.speechSynthesis.getVoices();
+                const hkVoice = voices.find(v => v.lang === 'zh-HK' || v.lang === 'zh_HK' || v.name.includes('Hong Kong') || v.name.includes('Cantonese'));
+                if (hkVoice) {
+                    utterance.voice = hkVoice;
+                }
+
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function showResults() {
+            playSound('win');
+            document.getElementById('quiz-card').classList.add('hidden');
+            document.getElementById('visual-modal').classList.add('hidden');
+            document.getElementById('results-screen').classList.remove('hidden');
+
+            document.getElementById('final-score').innerText = score;
+            document.getElementById('final-correct').innerText = `${correctAnswersCount} / ${questions.length}`;
+
+            // Calculate Stars
+            const starsElem = document.getElementById('stars-container');
+            const evalElem = document.getElementById('final-eval');
+
+            if (correctAnswersCount >= 18) {
+                starsElem.innerText = "⭐⭐⭐";
+                evalElem.innerText = "🌟 太厲害了！你是小數除法大師！所有小數點移動都難不倒你！";
+            } else if (correctAnswersCount >= 12) {
+                starsElem.innerText = "⭐⭐";
+                evalElem.innerText = "👍 做得很好！你已經基本掌握了小數點移動的規律！";
+            } else {
+                starsElem.innerText = "⭐";
+                evalElem.innerText = "💪 繼續加油！多看幾次圖解說明，小數除法會變得越來越簡單！";
+            }
+
+            speakCantonese(`冒險完成！你的得分是 ${score} 分。` + evalElem.innerText);
+        }
+
+        function restartGame() {
+            playSound('click');
+            currentQuestionIdx = 0;
+            score = 0;
+            combo = 0;
+            correctAnswersCount = 0;
+
+            document.getElementById('score-text').innerText = '0';
+            document.getElementById('combo-text').innerText = 'x0';
+
+            document.getElementById('results-screen').classList.add('hidden');
+            document.getElementById('quiz-card').classList.remove('hidden');
+
+            loadQuestion();
+        }
+
+        // Initialize game on window load
+        window.onload = function() {
+            // Ensure Web Speech API voice list is populated
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.onvoiceschanged = function() {
+                    window.speechSynthesis.getVoices();
+                };
+            }
+            loadQuestion();
+        };
+    </script>
+</body>
+</html>

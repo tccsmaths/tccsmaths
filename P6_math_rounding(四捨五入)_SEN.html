@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>小六數學：小數四捨五入大挑戰 (SEN 專用版)</title>
+  <style>
+    :root {
+      --primary-color: #4A90E2;
+      --secondary-color: #F5A623;
+      --success-color: #7ED321;
+      --error-color: #D0021B;
+      --bg-color: #F0F7FF;
+      --card-bg: #FFFFFF;
+      --text-color: #2C3E50;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: "Microsoft JhengHei", "微軟正黑體", "PingFang HK", sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 15px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .game-container {
+      background: var(--card-bg);
+      border-radius: 24px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 750px;
+      padding: 25px;
+      border: 4px solid #D6E4F0;
+      position: relative;
+    }
+
+    /* Header & Progress Bar */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      background: #E8F4FE;
+      padding: 12px 20px;
+      border-radius: 16px;
+    }
+
+    .score-box, .progress-box {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #1E56A0;
+    }
+
+    .progress-bar-container {
+      width: 100%;
+      height: 14px;
+      background-color: #E0E0E0;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background-color: var(--success-color);
+      transition: width 0.3s ease;
+    }
+
+    /* Question Box */
+    .question-card {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .question-title {
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin-bottom: 15px;
+      line-height: 1.5;
+    }
+
+    .audio-btn {
+      background-color: #9B59B6;
+      color: white;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 50px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 15px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      transition: transform 0.1s;
+    }
+
+    .audio-btn:active {
+      transform: scale(0.95);
+    }
+
+    /* Visual Diagram Sections */
+    .visual-section {
+      background: #FFFDF0;
+      border: 2px dashed #F5A623;
+      border-radius: 16px;
+      padding: 15px;
+      margin-bottom: 20px;
+    }
+
+    .visual-title {
+      font-size: 1rem;
+      color: #D35400;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    /* Place Value Cards */
+    .digit-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 15px;
+    }
+
+    .digit-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .digit-card {
+      width: 45px;
+      height: 55px;
+      border-radius: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 1.8rem;
+      font-weight: bold;
+      background-color: #F0F0F0;
+      border: 2px solid #CCC;
+    }
+
+    .digit-card.target {
+      background-color: #D4EDDA;
+      border-color: #28A745;
+      color: #155724;
+      transform: scale(1.1);
+    }
+
+    .digit-card.check {
+      background-color: #FFF3CD;
+      border-color: #FFC107;
+      color: #856404;
+      transform: scale(1.1);
+    }
+
+    .digit-label {
+      font-size: 0.75rem;
+      margin-top: 4px;
+      font-weight: bold;
+    }
+
+    /* SVG Number Line */
+    .number-line-svg {
+      width: 100%;
+      height: 80px;
+    }
+
+    /* Options Grid */
+    .options-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .option-btn {
+      background-color: #FFFFFF;
+      border: 3px solid #4A90E2;
+      color: #4A90E2;
+      padding: 15px;
+      border-radius: 16px;
+      font-size: 1.4rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+
+    .option-btn:hover {
+      background-color: #E8F4FE;
+    }
+
+    .option-btn.correct {
+      background-color: var(--success-color) !important;
+      color: white !important;
+      border-color: var(--success-color) !important;
+    }
+
+    .option-btn.incorrect {
+      background-color: var(--error-color) !important;
+      color: white !important;
+      border-color: var(--error-color) !important;
+    }
+
+    /* Footer / Controls */
+    .control-panel {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .hint-btn {
+      background-color: #F39C12;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .hint-box {
+      margin-top: 15px;
+      padding: 12px;
+      background-color: #EAECEE;
+      border-radius: 10px;
+      font-size: 1.1rem;
+      color: #34495E;
+      display: none;
+    }
+
+    /* Result Modal */
+    .result-screen {
+      display: none;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .result-title {
+      font-size: 2.2rem;
+      color: #2C3E50;
+      margin-bottom: 10px;
+    }
+
+    .star-rating {
+      font-size: 3rem;
+      color: #F5A623;
+      margin: 15px 0;
+    }
+
+    .restart-btn {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      border-radius: 50px;
+      font-size: 1.4rem;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 5px 15px rgba(74, 144, 226, 0.4);
+    }
+
+    @media (max-width: 500px) {
+      .options-grid {
+        grid-template-columns: 1fr;
+      }
+      .question-title {
+        font-size: 1.2rem;
+      }
+      .digit-card {
+        width: 35px;
+        height: 45px;
+        font-size: 1.4rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="game-container">
+    <!-- Quiz Interface -->
+    <div id="quiz-screen">
+      <div class="header">
+        <div class="progress-box">題目：<span id="current-q">1</span> / 20</div>
+        <div class="score-box">得分：<span id="score">0</span></div>
+      </div>
+
+      <div class="progress-bar-container">
+        <div class="progress-bar" id="progress-bar"></div>
+      </div>
+
+      <div class="question-card">
+        <button class="audio-btn" onclick="speakQuestion()">
+          🔊 廣東話朗讀題目
+        </button>
+        <div class="question-title" id="question-text">載入中...</div>
+      </div>
+
+      <!-- Visual Graphic Aid Section -->
+      <div class="visual-section">
+        <div class="visual-title">💡 數位圖解輔助：</div>
+        <!-- Digit breakdown -->
+        <div class="digit-container" id="digit-container"></div>
+        
+        <div class="visual-title">📏 數軸位置圖（看看它比較接近哪邊）：</div>
+        <!-- Number Line SVG -->
+        <svg class="number-line-svg" viewBox="0 0 500 80" id="number-line-svg">
+          <!-- SVG content generated dynamically -->
+        </svg>
+      </div>
+
+      <!-- Options -->
+      <div class="options-grid" id="options-grid"></div>
+
+      <!-- Hint Section -->
+      <div class="control-panel">
+        <button class="hint-btn" onclick="toggleHint()">💡 解題提示</button>
+      </div>
+      <div class="hint-box" id="hint-box"></div>
+    </div>
+
+    <!-- Result Screen -->
+    <div class="result-screen" id="result-screen">
+      <h1 class="result-title">🎉 完成練習！</h1>
+      <div class="star-rating" id="star-rating">⭐⭐⭐</div>
+      <p style="font-size: 1.5rem;" id="final-score-text">你獲得了 100 分！</p>
+      <p style="font-size: 1.2rem; color: #7F8C8D;" id="feedback-message">太棒了！你已經完全掌握小數四捨五入！</p>
+      <button class="restart-btn" onclick="restartGame()">🔄 再玩一次</button>
+    </div>
+  </div>
+
+  <script>
+    // 20 Questions Data customized for P6 SEN Hong Kong Curriculum
+    const questions = [
+      {
+        numStr: "3.47",
+        targetText: "十分位（小數點後一個位）",
+        correct: "3.5",
+        options: ["3.4", "3.5", "3.47", "4.0"],
+        targetIdx: 2, // '4' is at index 2 (3 . 4 7)
+        checkIdx: 3,  // '7' is at index 3
+        minVal: 3.4,
+        maxVal: 3.5,
+        val: 3.47,
+        hint: "十分位是 4，看下一位（百分位）是 7。7 大於或等於 5，所以要進一：4 變成 5，答案是 3.5。"
+      },
+      {
+        numStr: "6.23",
+        targetText: "小數點後一個位（十分位）",
+        correct: "6.2",
+        options: ["6.2", "6.3", "6.20", "6.0"],
+        targetIdx: 2,
+        checkIdx: 3,
+        minVal: 6.2,
+        maxVal: 6.3,
+        val: 6.23,
+        hint: "小數點後第一個位是 2，下一位是 3。3 小於 5，所以捨去，答案是 6.2。"
+      },
+      {
+        numStr: "1.85",
+        targetText: "十分位",
+        correct: "1.9",
+        options: ["1.8", "1.9", "2.0", "1.85"],
+        targetIdx: 2,
+        checkIdx: 3,
+        minVal: 1.8,
+        maxVal: 1.9,
+        val: 1.85,
+        hint: "十分位是 8，下一位是 5。5 剛好滿 5，要進一：8 變成 9，答案是 1.9。"
+      },
+      {
+        numStr: "5.04",
+        targetText: "小數點後一個位",
+        correct: "5.0",
+        options: ["5.0", "5.1", "5.4", "5.00"],
+        targetIdx: 2,
+        checkIdx: 3,
+        minVal: 5.0,
+        maxVal: 5.1,
+        val: 5.04,
+        hint: "十分位是 0，下一位是 4。4 小於 5，捨去，答案保留 5.0。"
+      },
+      {
+        numStr: "8.96",
+        targetText: "十分位（小數點後一個位）",
+        correct: "9.0",
+        options: ["8.9", "9.0", "8.96", "10.0"],
+        targetIdx: 2,
+        checkIdx: 3,
+        minVal: 8.9,
+        maxVal: 9.0,
+        val: 8.96,
+        hint: "十分位是 9，下一位是 6（≥5）要進一。9 進一變成 10，整數加 1，答案是 9.0。"
+      },
+      {
+        numStr: "12.314",
+        targetText: "百分位（小數點後兩個位）",
+        correct: "12.31",
+        options: ["12.30", "12.31", "12.32", "12.3"],
+        targetIdx: 4, // 1 2 . 3 1 4 -> '1' is index 4
+        checkIdx: 5,  // '4' is index 5
+        minVal: 12.31,
+        maxVal: 12.32,
+        val: 12.314,
+        hint: "百分位是 1，看千分位是 4。4 小於 5 捨去，答案是 12.31。"
+      },
+      {
+        numStr: "4.678",
+        targetText: "小數點後兩個位（百分位）",
+        correct: "4.68",
+        options: ["4.67", "4.68", "4.70", "4.60"],
+        targetIdx: 3, // 4 . 6 7 8
+        checkIdx: 4,
+        minVal: 4.67,
+        maxVal: 4.68,
+        val: 4.678,
+        hint: "百分位是 7，看千分位是 8。8 ≥ 5 要進一：7 變成 8，答案是 4.68。"
+      },
+      {
+        numStr: "0.525",
+        targetText: "百分位",
+        correct: "0.53",
+        options: ["0.52", "0.53", "0.50", "0.60"],
+        targetIdx: 3, // 0 . 5 2 5
+        checkIdx: 4,
+        minVal: 0.52,
+        maxVal: 0.53,
+        val: 0.525,
+        hint: "百分位是 2，千分位是 5。滿 5 進一：2 變成 3，答案是 0.53。"
+      },
+      {
+        numStr: "7.109",
+        targetText: "小數點後兩個位",
+        correct: "7.11",
+        options: ["7.10", "7.11", "7.12", "7.20"],
+        targetIdx: 3, // 7 . 1 0 9
+        checkIdx: 4,
+        minVal: 7.10,
+        maxVal: 7.11,
+        val: 7.109,
+        hint: "百分位是 0，千分位是 9。9 ≥ 5 進一：0 變成 1，答案是 7.11。"
+      },
+      {
+        numStr: "9.996",
+        targetText: "百分位（小數點後兩個位）",
+        correct: "10.00",
+        options: ["9.99", "9.90", "10.00", "10.0"],
+        targetIdx: 3, // 9 . 9 9 6
+        checkIdx: 4,
+        minVal: 9.99,
+        maxVal: 10.00,
+        val: 9.996,
+        hint: "千分位是 6 要進一，百分位 9+1=10，連續進位後答案是 10.00。"
+      },
+      {
+        numStr: "2.71",
+        targetText: "十分位",
+        correct: "2.7",
+        options: ["2.7", "2.8", "2.70", "3.0"],
+        targetIdx: 2,
+        checkIdx: 3,
+        minVal: 2.7,
+        maxVal: 2.8,
+        val: 2.71,
+        hint: "十分位是 7，百分位是 1。1 小於 5 捨去，答案是 2.7。"
+      },
+      {
+        numStr: "15.48",
+        targetText: "小數點後一個位",
+        correct: "15.5",
+        options: ["15.4", "15.5", "15.0", "16.0"],
+        targetIdx: 4, // 1 5 . 4 8
+        checkIdx: 5,
+        minVal: 15.4,
+        maxVal: 15.5,
+        val: 15.48,
+        hint: "十分位是 4，百分位是 8。8 ≥ 5 進一：4 變成 5，答案是 15.5。"
+      },
+      {
+        numStr: "0.06",
+        targetText: "十分位（小數點後一個位）",
+        correct: "0.1",
+        options: ["0.0", "0.1", "0.6", "1.0"],
+        targetIdx: 2,
+        checkIdx: 3,
+        minVal: 0.0,
+        maxVal: 0.1,
+        val: 0.06,
+        hint: "十分位是 0，百分位是 6。6 ≥ 5 進一：0 變成 1，答案是 0.1。"
+      },
+      {
+        numStr: "8.351",
+        targetText: "百分位",
+        correct: "8.35",
+        options: ["8.35", "8.36", "8.30", "8.40"],
+        targetIdx: 3, // 8 . 3 5 1
+        checkIdx: 4,
+        minVal: 8.35,
+        maxVal: 8.36,
+        val: 8.351,
+        hint: "百分位是 5，千分位是 1。1 小於 5 捨去，答案是 8.35。"
+      },
+      {
+        numStr: "3.196",
+        targetText: "小數點後兩個位",
+        correct: "3.20",
+        options: ["3.19", "3.20", "3.21", "3.10"],
+        targetIdx: 3, // 3 . 1 9 6
+        checkIdx: 4,
+        minVal: 3.19,
+        maxVal: 3.20,
+        val: 3.196,
+        hint: "百分位是 9，千分位是 6。6 ≥ 5 進一：3.19 + 0.01 = 3.20。"
+      },
+      {
+        numStr: "10.049",
+        targetText: "百分位（小數點後兩個位）",
+        correct: "10.05",
+        options: ["10.04", "10.05", "10.10", "10.00"],
+        targetIdx: 4, // 1 0 . 0 4 9
+        checkIdx: 5,
+        minVal: 10.04,
+        maxVal: 10.05,
+        val: 10.049,
+        hint: "百分位是 4，看千分位是 9。9 ≥ 5 進一：4 變成 5，答案是 10.05。"
+      },
+      {
+        numStr: "4.55",
+        targetText: "小數點後一個位",
+        correct: "4.6",
+        options: ["4.5", "4.6", "5.0", "4.50"],
+        targetIdx: 2,
+        checkIdx: 3,
+        minVal: 4.5,
+        maxVal: 4.6,
+        val: 4.55,
+        hint: "十分位是 5，百分位是 5。滿 5 進一：5 變成 6，答案是 4.6。"
+      },
+      {
+        numStr: "0.782",
+        targetText: "百分位",
+        correct: "0.78",
+        options: ["0.78", "0.79", "0.80", "0.70"],
+        targetIdx: 3, // 0 . 7 8 2
+        checkIdx: 4,
+        minVal: 0.78,
+        maxVal: 0.79,
+        val: 0.782,
+        hint: "百分位是 8，千分位是 2。2 小於 5 捨去，答案是 0.78。"
+      },
+      {
+        numStr: "6.899",
+        targetText: "小數點後兩個位",
+        correct: "6.90",
+        options: ["6.89", "6.90", "6.99", "7.00"],
+        targetIdx: 3, // 6 . 8 9 9
+        checkIdx: 4,
+        minVal: 6.89,
+        maxVal: 6.90,
+        val: 6.899,
+        hint: "千分位是 9 要進一，6.89 進位後變成 6.90。"
+      },
+      {
+        numStr: "23.415",
+        targetText: "小數點後兩個位（百分位）",
+        correct: "23.42",
+        options: ["23.41", "23.42", "23.40", "23.50"],
+        targetIdx: 5, // 2 3 . 4 1 5
+        checkIdx: 6,
+        minVal: 23.41,
+        maxVal: 23.42,
+        val: 23.415,
+        hint: "百分位是 1，千分位是 5。滿 5 進一：1 變成 2，答案是 23.42。"
+      }
+    ];
+
+    let currentQIndex = 0;
+    let score = 0;
+    let audioCtx = null;
+
+    // Initialize Game
+    function initGame() {
+      currentQIndex = 0;
+      score = 0;
+      document.getElementById('score').innerText = score;
+      document.getElementById('quiz-screen').style.display = 'block';
+      document.getElementById('result-screen').style.display = 'none';
+      loadQuestion();
+    }
+
+    // Load Single Question
+    function loadQuestion() {
+      const q = questions[currentQIndex];
+      
+      // Update header
+      document.getElementById('current-q').innerText = currentQIndex + 1;
+      const progressPercent = ((currentQIndex) / questions.length) * 100;
+      document.getElementById('progress-bar').style.width = progressPercent + '%';
+
+      // Question text
+      const qText = `把小數 <strong style="color:#4A90E2; font-size:1.8rem;">${q.numStr}</strong> 四捨五入取至 <strong>${q.targetText}</strong>。`;
+      document.getElementById('question-text').innerHTML = qText;
+
+      // Hide Hint Box
+      const hintBox = document.getElementById('hint-box');
+      hintBox.style.display = 'none';
+      hintBox.innerText = q.hint;
+
+      // Build Visual Digit Breakdown Cards
+      renderDigitCards(q);
+
+      // Render Number Line SVG
+      renderNumberLine(q);
+
+      // Render Options Buttons
+      const optionsGrid = document.getElementById('options-grid');
+      optionsGrid.innerHTML = '';
+      q.options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.innerText = opt;
+        btn.onclick = () => checkAnswer(opt, btn);
+        optionsGrid.appendChild(btn);
+      });
+
+      // Auto Cantonese read-aloud optional or delayed
+      setTimeout(() => speakQuestion(), 300);
+    }
+
+    // Render Digit Breakdown
+    function renderDigitCards(q) {
+      const container = document.getElementById('digit-container');
+      container.innerHTML = '';
+      const chars = q.numStr.split('');
+
+      chars.forEach((ch, idx) => {
+        const box = document.createElement('div');
+        box.className = 'digit-box';
+
+        const card = document.createElement('div');
+        card.className = 'digit-card';
+        card.innerText = ch;
+
+        const label = document.createElement('div');
+        label.className = 'digit-label';
+
+        if (idx === q.targetIdx) {
+          card.classList.add('target');
+          label.innerText = '目標位';
+          label.style.color = '#28A745';
+        } else if (idx === q.checkIdx) {
+          card.classList.add('check');
+          label.innerText = '觀察位';
+          label.style.color = '#856404';
+        }
+
+        box.appendChild(card);
+        box.appendChild(label);
+        container.appendChild(box);
+      });
+    }
+
+    // Render SVG Visual Number Line
+    function renderNumberLine(q) {
+      const svg = document.getElementById('number-line-svg');
+      const min = q.minVal;
+      const max = q.maxVal;
+      const val = q.val;
+      
+      // Position percentage (between 10% and 90% for display)
+      const pct = (val - min) / (max - min);
+      const cx = 60 + pct * 380; // scale to fit svg width (500)
+
+      svg.innerHTML = `
+        <!-- Main horizontal line -->
+        <line x1="50" y1="40" x2="450" y2="40" stroke="#4A90E2" stroke-width="6" stroke-linecap="round" />
+        
+        <!-- Left tick (Min) -->
+        <line x1="60" y1="25" x2="60" y2="55" stroke="#4A90E2" stroke-width="4" />
+        <text x="60" y="72" text-anchor="middle" font-size="16" font-weight="bold" fill="#2C3E50">${min}</text>
+
+        <!-- Right tick (Max) -->
+        <line x1="440" y1="25" x2="440" y2="55" stroke="#4A90E2" stroke-width="4" />
+        <text x="440" y="72" text-anchor="middle" font-size="16" font-weight="bold" fill="#2C3E50">${max}</text>
+
+        <!-- Current Value Marker -->
+        <circle cx="${cx}" cy="40" r="12" fill="#F5A623" stroke="#FFFFFF" stroke-width="3" />
+        <text x="${cx}" y="20" text-anchor="middle" font-size="16" font-weight="bold" fill="#D35400">${val}</text>
+      `;
+    }
+
+    // Check Answer
+    function checkAnswer(selectedOpt, btnElement) {
+      const q = questions[currentQIndex];
+      const allBtns = document.querySelectorAll('.option-btn');
+      allBtns.forEach(b => b.disabled = true);
+
+      if (selectedOpt === q.correct) {
+        btnElement.classList.add('correct');
+        playSound(true);
+        score += 5;
+        document.getElementById('score').innerText = score;
+      } else {
+        btnElement.classList.add('incorrect');
+        playSound(false);
+        // Highlight correct one
+        allBtns.forEach(b => {
+          if (b.innerText === q.correct) b.classList.add('correct');
+        });
+      }
+
+      // Next Question Delay
+      setTimeout(() => {
+        currentQIndex++;
+        if (currentQIndex < questions.length) {
+          loadQuestion();
+        } else {
+          showResults();
+        }
+      }, 1800);
+    }
+
+    // Hint toggle
+    function toggleHint() {
+      const hintBox = document.getElementById('hint-box');
+      if (hintBox.style.display === 'none' || hintBox.style.display === '') {
+        hintBox.style.display = 'block';
+        speakText("提示：" + hintBox.innerText);
+      } else {
+        hintBox.style.display = 'none';
+      }
+    }
+
+    // Cantonese Voice Readout
+    function speakQuestion() {
+      const q = questions[currentQIndex];
+      const textToSpeak = `把小數 ${q.numStr} 四捨五入取至 ${q.targetText}。`;
+      speakText(textToSpeak);
+    }
+
+    function speakText(text) {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel(); // Stop previous audio
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'zh-HK'; // Cantonese
+        utterance.rate = 0.85; // Slightly slower speed for SEN learners
+        utterance.pitch = 1.0;
+        window.speechSynthesis.speak(utterance);
+      }
+    }
+
+    // Web Audio API Sound Effects (No external files needed)
+    function playSound(isCorrect) {
+      try {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        if (isCorrect) {
+          osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+          osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.1); // E5
+          gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+          osc.start();
+          osc.stop(audioCtx.currentTime + 0.3);
+        } else {
+          osc.frequency.setValueAtTime(220, audioCtx.currentTime); // A3
+          osc.frequency.setValueAtTime(196, audioCtx.currentTime + 0.15); // G3
+          gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+          osc.start();
+          osc.stop(audioCtx.currentTime + 0.4);
+        }
+      } catch (e) {
+        console.log("Audio play error", e);
+      }
+    }
+
+    // Show Results Screen
+    function showResults() {
+      document.getElementById('quiz-screen').style.display = 'none';
+      document.getElementById('result-screen').style.display = 'block';
+      
+      const finalScore = score;
+      document.getElementById('final-score-text').innerText = `總得分：${finalScore} / 100 分`;
+
+      let stars = "⭐⭐⭐";
+      let msg = "太厲害了！你完全掌握了小數四捨五入！";
+
+      if (finalScore < 60) {
+        stars = "⭐";
+        msg = "繼續加油！多看幾次圖解提示，你一定可以做好的！";
+      } else if (finalScore < 85) {
+        stars = "⭐⭐";
+        msg = "做得好！你已經掌握大部份內容了！";
+      }
+
+      document.getElementById('star-rating').innerText = stars;
+      document.getElementById('feedback-message').innerText = msg;
+      
+      speakText(`完成練習！你獲得了 ${finalScore} 分。` + msg);
+    }
+
+    function restartGame() {
+      initGame();
+    }
+
+    // Start on load
+    window.onload = initGame;
+  </script>
+</body>
+</html>

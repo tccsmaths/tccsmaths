@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小六數學科：分數、百分數和小數互化大冒險</title>
+    <style>
+        :root {
+            --primary: #4A90E2;
+            --primary-dark: #357ABD;
+            --secondary: #FF9F43;
+            --success: #2ECC71;
+            --danger: #FF6B6B;
+            --warning: #F1C40F;
+            --bg-color: #F0F4F8;
+            --card-bg: #FFFFFF;
+            --text-color: #2C3E50;
+            --border-radius: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: "Chalkboard SE", "Comic Sans MS", "Microsoft JhengHei", "微軟正黑體", sans-serif;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 15px;
+        }
+
+        .game-container {
+            width: 100%;
+            max-width: 800px;
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            border: 4px solid #E1E8ED;
+            position: relative;
+        }
+
+        /* Top Header Area */
+        .game-header {
+            background: linear-gradient(135deg, #6C5CE7, #a29bfe);
+            color: white;
+            padding: 18px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .game-title {
+            font-size: 22px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .badge-level {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 15px;
+            font-weight: bold;
+            color: white;
+            display: inline-block;
+        }
+        .level-easy { background-color: #2ED573; }
+        .level-medium { background-color: #FFA502; }
+        .level-hard { background-color: #FF4757; }
+
+        .stats-bar {
+            display: flex;
+            gap: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            align-items: center;
+        }
+
+        .stat-item {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 6px 14px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            width: 100%;
+            height: 12px;
+            background-color: #E2E8F0;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #00b894, #00cec9);
+            transition: width 0.4s ease;
+        }
+
+        /* Main Content Screen */
+        .content-area {
+            padding: 25px 30px;
+        }
+
+        .start-screen {
+            text-align: center;
+            padding: 30px 10px;
+        }
+
+        .start-screen h1 {
+            color: #6C5CE7;
+            font-size: 32px;
+            margin-bottom: 15px;
+        }
+
+        .start-screen p {
+            font-size: 18px;
+            color: #555;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        .btn-main {
+            background-color: #FF9F43;
+            color: white;
+            border: none;
+            padding: 16px 36px;
+            font-size: 22px;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #E67E22;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-main:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 0 #E67E22;
+            background-color: #FFA852;
+        }
+
+        .btn-main:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #E67E22;
+        }
+
+        /* Question Box */
+        .question-card {
+            background-color: #F8FAFC;
+            border: 3px solid #E2E8F0;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .question-text {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2D3748;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .btn-audio {
+            background: #6C5CE7;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 4px 0 #5A49E0;
+            transition: all 0.2s;
+        }
+
+        .btn-audio:hover {
+            background: #5A49E0;
+        }
+
+        .btn-audio:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #5A49E0;
+        }
+
+        .visual-display {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 15px 0;
+            min-height: 120px;
+            background: #FFFFFF;
+            padding: 15px;
+            border-radius: 12px;
+            border: 2px dashed #CBD5E0;
+        }
+
+        /* Options Grid */
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .options-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .option-btn {
+            background-color: #FFFFFF;
+            border: 3px solid #CBD5E0;
+            border-radius: 14px;
+            padding: 18px;
+            font-size: 22px;
+            font-weight: bold;
+            color: #2D3748;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            box-shadow: 0 4px 0 #CBD5E0;
+        }
+
+        .option-btn:hover {
+            border-color: #4A90E2;
+            background-color: #EBF8FF;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 0 #357ABD;
+        }
+
+        .option-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #357ABD;
+        }
+
+        /* Modal / Explanation Popup */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            max-width: 650px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            animation: popIn 0.3s ease-out;
+            position: relative;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #E2E8F0;
+        }
+
+        .modal-header.correct { color: #2ECC71; }
+        .modal-header.incorrect { color: #FF6B6B; }
+
+        .explanation-box {
+            background-color: #FFF9DB;
+            border: 2px solid #FFE066;
+            border-radius: 12px;
+            padding: 15px;
+            margin: 15px 0;
+            font-size: 18px;
+            line-height: 1.6;
+            color: #495057;
+        }
+
+        .diagram-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 15px 0;
+            background: #F8F9FA;
+            padding: 15px;
+            border-radius: 12px;
+            border: 2px dashed #CED4DA;
+        }
+
+        /* SVGs and Visual Helpers */
+        .grid-100 {
+            display: grid;
+            grid-template-columns: repeat(10, 24px);
+            grid-template-rows: repeat(10, 24px);
+            gap: 2px;
+            background-color: #333;
+            padding: 3px;
+            border-radius: 6px;
+        }
+
+        .grid-cell {
+            background-color: #FFF;
+            border-radius: 2px;
+        }
+
+        .grid-cell.shaded {
+            background-color: #FF6B6B;
+        }
+
+        .grid-10 {
+            display: grid;
+            grid-template-columns: repeat(10, 28px);
+            grid-template-rows: 35px;
+            gap: 3px;
+            background-color: #333;
+            padding: 4px;
+            border-radius: 6px;
+        }
+
+        .fraction-bar {
+            display: flex;
+            width: 280px;
+            height: 40px;
+            border: 3px solid #333;
+            border-radius: 8px;
+            overflow: hidden;
+            background: white;
+        }
+
+        .fraction-segment {
+            flex: 1;
+            border-right: 2px solid #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .fraction-segment:last-child {
+            border-right: none;
+        }
+
+        .fraction-segment.shaded {
+            background-color: #4D96FF;
+            color: white;
+        }
+
+        /* End Screen */
+        .end-screen {
+            text-align: center;
+            padding: 30px 15px;
+        }
+
+        .end-screen h2 {
+            font-size: 32px;
+            color: #6C5CE7;
+            margin-bottom: 15px;
+        }
+
+        .score-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #FF9F43, #FF6B6B);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto 20px auto;
+            box-shadow: 0 8px 20px rgba(255, 159, 67, 0.4);
+        }
+
+        .score-circle .number {
+            font-size: 46px;
+            font-weight: bold;
+        }
+
+        .score-circle .label {
+            font-size: 14px;
+        }
+
+        .badge-list {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .badge-item {
+            background: #F1F2F6;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #2F3542;
+        }
+
+        /* Feature Tags for SEN Support */
+        .sen-feature-bar {
+            background-color: #EBF8FF;
+            padding: 10px 15px;
+            border-radius: 10px;
+            font-size: 14px;
+            color: #2B6CB0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    <!-- Header -->
+    <div class="game-header">
+        <div class="game-title">
+            <span>🧮 數學小達人</span>
+            <span id="level-badge" class="badge-level level-easy">初級</span>
+        </div>
+        <div class="stats-bar">
+            <div class="stat-item">⭐ 分數: <span id="score">0</span></div>
+            <div class="stat-item">📌 題目: <span id="current-q-num">1</span>/20</div>
+        </div>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="progress-container">
+        <div id="progress-bar" class="progress-bar"></div>
+    </div>
+
+    <!-- Content Area -->
+    <div class="content-area">
+        
+        <!-- Start Screen -->
+        <div id="start-screen" class="start-screen">
+            <h1>分數、百分數和小數互化大冒險</h1>
+            <div class="sen-feature-bar">
+                <span>🔊 廣東話語音朗讀</span>
+                <span>🎨 視覺圖形輔助解題</span>
+                <span>⭐ 循序漸進 300分挑戰</span>
+            </div>
+            <p>歡迎來到數學學習遊戲！<br>這裡共有 20 道趣味練習，分為「初級、中級、高級」。<br>如有不懂，別擔心，系統會有圖形引導解題喔！準備好了嗎？</p>
+            <button class="btn-main" onclick="startGame()">🚀 開始冒險</button>
+        </div>
+
+        <!-- Question Screen -->
+        <div id="question-screen" style="display: none;">
+            <div class="question-card">
+                <div class="question-text">
+                    <span id="question-title">題目載入中...</span>
+                    <button class="btn-audio" onclick="readQuestion()">🔊 聽題目</button>
+                </div>
+                
+                <!-- Visual Container for Questions with Diagram -->
+                <div id="question-visual-container" class="visual-display" style="display: none;"></div>
+            </div>
+
+            <!-- Options Grid -->
+            <div class="options-grid" id="options-grid"></div>
+        </div>
+
+        <!-- End Screen -->
+        <div id="end-screen" class="end-screen" style="display: none;">
+            <h2>🎉 完成挑戰！太棒了！</h2>
+            <div class="score-circle">
+                <span class="number" id="final-score">0</span>
+                <span class="label">總得分 / 200</span>
+            </div>
+            <p id="final-message" style="font-size: 20px; color: #4A5568; margin-bottom: 20px;"></p>
+            
+            <div class="badge-list">
+                <div class="badge-item">🏆 正確答對: <span id="correct-count">0</span>/20</div>
+                <div class="badge-item">🌟 學習星級: <span id="star-rating">⭐⭐⭐</span></div>
+            </div>
+
+            <button class="btn-main" onclick="restartGame()">🔄 再玩一次</button>
+        </div>
+
+    </div>
+</div>
+
+<!-- Modal Explanation Popup -->
+<div id="explanation-modal" class="modal-overlay">
+    <div class="modal-content">
+        <div id="modal-header" class="modal-header"></div>
+        <div id="modal-body">
+            <div class="explanation-box" id="modal-text-explanation"></div>
+            
+            <div class="diagram-container">
+                <h4 style="margin-bottom: 10px; color: #4A5568;">🎨 圖形輔助解題說明：</h4>
+                <div id="modal-diagram-area"></div>
+            </div>
+        </div>
+        <div style="text-align: center; margin-top: 20px;">
+            <button class="btn-audio" style="margin-right: 10px;" onclick="readExplanation()">🔊 朗讀解題</button>
+            <button class="btn-main" style="padding: 10px 25px; font-size: 18px;" onclick="nextQuestion()">➡️ 下一題</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Audio Synth Effects using Web Audio API
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    
+    function playSound(type) {
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        if (type === 'correct') {
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+            osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.1); // E5
+            osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.2); // G5
+            gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.4);
+        } else if (type === 'wrong') {
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(220, audioCtx.currentTime); // A3
+            osc.frequency.setValueAtTime(174.61, audioCtx.currentTime + 0.15); // F3
+            gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.4);
+        }
+    }
+
+    // Cantonese TTS Speech Synthesis
+    function speakCantonese(text) {
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'zh-HK'; // Hong Kong Cantonese
+            utterance.rate = 0.85; // Slightly slower for SEN clear understanding
+            window.speechSynthesis.speak(utterance);
+        } else {
+            alert("您的瀏覽器不支援語音合成功能。");
+        }
+    }
+
+    // 20 Questions Data Structure
+    const questions = [
+        // ----- 初級 (Easy, 1-7) -----
+        {
+            id: 1,
+            level: "初級",
+            levelClass: "level-easy",
+            question: "把 1/2 化為百分數。",
+            speechText: "把 二分之一 化為百分數。",
+            options: ["20%", "50%", "80%", "10%"],
+            answer: 1,
+            explanation: "1/2 即是把整體分成 2 等份，取其中的 1 份。<br>換算成 100 等份即是 50 份，所以是 50%。",
+            visualType: "bar",
+            visualData: { shaded: 1, total: 2, label: "1/2 = 50%" }
+        },
+        {
+            id: 2,
+            level: "初級",
+            levelClass: "level-easy",
+            question: "把 0.4 化為百分數。",
+            speechText: "把 零點四 化為百分數。",
+            options: ["4%", "40%", "400%", "0.4%"],
+            answer: 1,
+            explanation: "0.4 等於十分之四 (4/10)。<br>將分母乘以 10 變成 100，分子 4 乘以 10 變成 40，即 40/100 = 40%。",
+            visualType: "grid10",
+            visualData: { shaded: 4, total: 10, label: "0.4 = 4/10 = 40%" }
+        },
+        {
+            id: 3,
+            level: "初級",
+            levelClass: "level-easy",
+            question: "桌子上有 10 個貼紙，其中 3 個是星形貼紙。星形貼紙佔全部貼紙的百分之幾？",
+            speechText: "桌子上有 10 個貼紙，其中 3 個是星形貼紙。星形貼紙佔全部貼紙的百分之幾？",
+            options: ["30%", "3%", "300%", "13%"],
+            answer: 0,
+            explanation: "3 個佔 10 個的 3/10。<br>3/10 = 30/100 = 30%。",
+            visualType: "grid10",
+            visualData: { shaded: 3, total: 10, label: "3/10 = 30%" }
+        },
+        {
+            id: 4,
+            level: "初級",
+            levelClass: "level-easy",
+            question: "把 10% 化為小數。",
+            speechText: "把 百分之十 化為小數。",
+            options: ["0.01", "0.1", "1.0", "0.001"],
+            answer: 1,
+            explanation: "10% 即是 10/100 = 1/10。<br>1/10 用小數表示就是 0.1。",
+            visualType: "grid100",
+            visualData: { shaded: 10, total: 100, label: "10% = 10/100 = 0.1" }
+        },
+        {
+            id: 5,
+            level: "初級",
+            levelClass: "level-easy",
+            question: "把 1/4 化為百分數。",
+            speechText: "把 四分之一 化為百分數。",
+            options: ["25%", "14%", "40%", "75%"],
+            answer: 0,
+            explanation: "1/4 即是把 100% 平分成 4 份，每份是 25%。<br>1/4 = (1×25)/(4×25) = 25/100 = 25%。",
+            visualType: "bar",
+            visualData: { shaded: 1, total: 4, label: "1/4 = 25%" }
+        },
+        {
+            id: 6,
+            level: "初級",
+            levelClass: "level-easy",
+            question: "下圖 10 格圖形中，有 2 格填上了陰影，陰影部分佔全圖的百分之幾？",
+            speechText: "下圖 10 格圖形中，有 2 格填上了陰影，陰影部分佔全圖的百分之幾？",
+            options: ["2%", "20%", "200%", "80%"],
+            answer: 1,
+            hasQuestionVisual: true,
+            questionVisualData: { type: "grid10", shaded: 2, total: 10 },
+            explanation: "陰影部分佔了 2/10。<br>2/10 = 20/100 = 20%。",
+            visualType: "grid10",
+            visualData: { shaded: 2, total: 10, label: "2/10 = 20%" }
+        },
+        {
+            id: 7,
+            level: "初級",
+            levelClass: "level-easy",
+            question: "把 0.7 化為分數。",
+            speechText: "把 零點七 化為分數。",
+            options: ["7/100", "7/10", "1/7", "7/5"],
+            answer: 1,
+            explanation: "0.7 是小數一位，代表小數點後第一位是「十分位」。<br>所以 0.7 = 7/10。",
+            visualType: "grid10",
+            visualData: { shaded: 7, total: 10, label: "0.7 = 7/10" }
+        },
+
+        // ----- 中級 (Medium, 8-14) -----
+        {
+            id: 8,
+            level: "中級",
+            levelClass: "level-medium",
+            question: "把 4/5 化為百分數。",
+            speechText: "把 五分之四 化為百分數。",
+            options: ["40%", "75%", "80%", "85%"],
+            answer: 2,
+            explanation: "4/5 = (4×20) / (5×20) = 80/100 = 80%。",
+            visualType: "bar",
+            visualData: { shaded: 4, total: 5, label: "4/5 = 80/100 = 80%" }
+        },
+        {
+            id: 9,
+            level: "中級",
+            levelClass: "level-medium",
+            question: "把 0.6 化為百分數。",
+            speechText: "把 零點六 化為百分數。",
+            options: ["60%", "6%", "600%", "66%"],
+            answer: 0,
+            explanation: "0.6 = 6/10 = 60/100 = 60%。",
+            visualType: "grid100",
+            visualData: { shaded: 60, total: 100, label: "0.6 = 60/100 = 60%" }
+        },
+        {
+            id: 10,
+            level: "中級",
+            levelClass: "level-medium",
+            question: "把 11/20 化為百分數。",
+            speechText: "把 二十分之十一 化為百分數。",
+            options: ["11%", "50%", "55%", "65%"],
+            answer: 2,
+            explanation: "11/20 = (11×5) / (20×5) = 55/100 = 55%。",
+            visualType: "grid100",
+            visualData: { shaded: 55, total: 100, label: "11/20 = 55%" }
+        },
+        {
+            id: 11,
+            level: "中級",
+            levelClass: "level-medium",
+            question: "把 90% 化為小數。",
+            speechText: "把 百分之九十 化為小數。",
+            options: ["0.9", "0.09", "9.0", "0.99"],
+            answer: 0,
+            explanation: "90% = 90/100 = 9/10 = 0.9。",
+            visualType: "grid100",
+            visualData: { shaded: 90, total: 100, label: "90% = 0.9" }
+        },
+        {
+            id: 12,
+            level: "中級",
+            levelClass: "level-medium",
+            question: "把 8% 化為分數，並約至最簡。",
+            speechText: "把 百分之八 化為分數，並約至最簡。",
+            options: ["8/100", "2/25", "4/25", "1/8"],
+            answer: 1,
+            explanation: "8% = 8/100。<br>分子分母同除以 4 約簡：(8÷4) / (100÷4) = 2/25。",
+            visualType: "grid100",
+            visualData: { shaded: 8, total: 100, label: "8% = 8/100 = 2/25" }
+        },
+        {
+            id: 13,
+            level: "中級",
+            levelClass: "level-medium",
+            question: "下圖百格圖中，陰影部分有 75 格，佔全圖的百分之幾？",
+            speechText: "下圖百格圖中，陰影部分有 75 格，佔全圖的百分之幾？",
+            options: ["25%", "70%", "75%", "85%"],
+            answer: 2,
+            hasQuestionVisual: true,
+            questionVisualData: { type: "grid100", shaded: 75, total: 100 },
+            explanation: "全圖共 100 格，陰影佔了 75 格。<br>75/100 = 75%。",
+            visualType: "grid100",
+            visualData: { shaded: 75, total: 100, label: "75/100 = 75%" }
+        },
+        {
+            id: 14,
+            level: "中級",
+            levelClass: "level-medium",
+            question: "把 3/25 化為百分數。",
+            speechText: "把 二十五分之三 化為百分數。",
+            options: ["3%", "12%", "25%", "15%"],
+            answer: 1,
+            explanation: "3/25 = (3×4) / (25×4) = 12/100 = 12%。",
+            visualType: "grid100",
+            visualData: { shaded: 12, total: 100, label: "3/25 = 12/100 = 12%" }
+        },
+
+        // ----- 高級 (Hard, 15-20) -----
+        {
+            id: 15,
+            level: "高級",
+            levelClass: "level-hard",
+            question: "把 140% 化為帶分數，並約至最簡。",
+            speechText: "把 百分之百四十 化為帶分數，並約至最簡。",
+            options: ["1 又 2/5", "1 又 4/10", "14/5", "1 又 4/5"],
+            answer: 0,
+            explanation: "140% = 140/100 = 1 又 40/100。<br>將 40/100 約簡（分子分母同除以 20）得到 2/5。<br>所以是 1 又 2/5 (1 2/5)。",
+            visualType: "mixed",
+            visualData: { whole: 1, extraShaded: 40, extraTotal: 100, label: "140% = 1 + 40/100 = 1 又 2/5" }
+        },
+        {
+            id: 16,
+            level: "高級",
+            levelClass: "level-hard",
+            question: "把 250% 化為小數。",
+            speechText: "把 百分之二百五十 化為小數。",
+            options: ["25", "2.5", "0.25", "2.5%"],
+            answer: 1,
+            explanation: "250% = 250/100 = 2.5。",
+            visualType: "mixed",
+            visualData: { whole: 2, extraShaded: 50, extraTotal: 100, label: "250% = 2 + 0.5 = 2.5" }
+        },
+        {
+            id: 17,
+            level: "高級",
+            levelClass: "level-hard",
+            question: "把 1.3 化為百分數。",
+            speechText: "把 一點三 化為百分數。",
+            options: ["13%", "1.3%", "130%", "30%"],
+            answer: 2,
+            explanation: "1.3 = 1 又 3/10 = 1 又 30/100 = 130/100 = 130%。",
+            visualType: "mixed",
+            visualData: { whole: 1, extraShaded: 30, extraTotal: 100, label: "1.3 = 100% + 30% = 130%" }
+        },
+        {
+            id: 18,
+            level: "高級",
+            levelClass: "level-hard",
+            question: "把 1 又 9/10 (1 9/10) 化為百分數。",
+            speechText: "把 一又十分之九 化為百分數。",
+            options: ["109%", "190%", "19%", "90%"],
+            answer: 1,
+            explanation: "1 又 9/10 = 19/10 = (19×10)/(10×10) = 190/100 = 190%。",
+            visualType: "mixed",
+            visualData: { whole: 1, extraShaded: 90, extraTotal: 100, label: "1 又 9/10 = 100% + 90% = 190%" }
+        },
+        {
+            id: 19,
+            level: "高級",
+            levelClass: "level-hard",
+            question: "把 7% 化為小數。",
+            speechText: "把 百分之七 化為小數。",
+            options: ["0.7", "0.07", "7.0", "0.007"],
+            answer: 1,
+            explanation: "7% = 7/100。<br>百分位是小數點後第二位，所以是 0.07。",
+            visualType: "grid100",
+            visualData: { shaded: 7, total: 100, label: "7% = 7/100 = 0.07" }
+        },
+        {
+            id: 20,
+            level: "高級",
+            levelClass: "level-hard",
+            question: "把 0.125 化為百分數。",
+            speechText: "把 零點一二五 化為百分數。",
+            options: ["1.25%", "12.5%", "125%", "0.125%"],
+            answer: 1,
+            explanation: "把小數乘以 100% 便可化為百分數：<br>0.125 × 100% = 12.5%。",
+            visualType: "grid100",
+            visualData: { shaded: 12.5, total: 100, label: "0.125 = 12.5/100 = 12.5%" }
+        }
+    ];
+
+    let currentQIndex = 0;
+    let score = 0;
+    let correctCount = 0;
+
+    function startGame() {
+        document.getElementById('start-screen').style.display = 'none';
+        document.getElementById('question-screen').style.display = 'block';
+        currentQIndex = 0;
+        score = 0;
+        correctCount = 0;
+        updateScore();
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        const q = questions[currentQIndex];
+        
+        // Update header & badges
+        document.getElementById('current-q-num').innerText = currentQIndex + 1;
+        const levelBadge = document.getElementById('level-badge');
+        levelBadge.innerText = q.level;
+        levelBadge.className = `badge-level ${q.levelClass}`;
+
+        // Update progress bar
+        const progressPercent = ((currentQIndex) / questions.length) * 100;
+        document.getElementById('progress-bar').style.width = `${progressPercent}%`;
+
+        // Question Title
+        document.getElementById('question-title').innerText = q.question;
+
+        // Render question visual if present
+        const visualContainer = document.getElementById('question-visual-container');
+        if (q.hasQuestionVisual) {
+            visualContainer.style.display = 'flex';
+            visualContainer.innerHTML = renderDiagram(q.questionVisualData.type, q.questionVisualData);
+        } else {
+            visualContainer.style.display = 'none';
+            visualContainer.innerHTML = '';
+        }
+
+        // Render options
+        const optionsGrid = document.getElementById('options-grid');
+        optionsGrid.innerHTML = '';
+        q.options.forEach((opt, idx) => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.innerText = opt;
+            btn.onclick = () => checkAnswer(idx);
+            optionsGrid.appendChild(btn);
+        });
+
+        // Auto read question for SEN support
+        readQuestion();
+    }
+
+    function readQuestion() {
+        const q = questions[currentQIndex];
+        speakCantonese(q.speechText || q.question);
+    }
+
+    function checkAnswer(selectedIndex) {
+        const q = questions[currentQIndex];
+        const modal = document.getElementById('explanation-modal');
+        const modalHeader = document.getElementById('modal-header');
+        const modalText = document.getElementById('modal-text-explanation');
+        const modalDiagram = document.getElementById('modal-diagram-area');
+
+        if (selectedIndex === q.answer) {
+            // Correct
+            playSound('correct');
+            score += 10;
+            correctCount++;
+            updateScore();
+            
+            modalHeader.className = "modal-header correct";
+            modalHeader.innerHTML = "🎉 太棒了！答對了！";
+            modalText.innerHTML = `<strong>答案解析：</strong><br>${q.explanation}`;
+        } else {
+            // Wrong
+            playSound('wrong');
+            modalHeader.className = "modal-header incorrect";
+            modalHeader.innerHTML = "💡 加油！我們一起看看解題圖形：";
+            modalText.innerHTML = `<strong>正確答案是：${q.options[q.answer]}</strong><br><br><strong>解題步驟：</strong><br>${q.explanation}`;
+        }
+
+        // Render visual diagram in modal
+        modalDiagram.innerHTML = renderDiagram(q.visualType, q.visualData);
+
+        modal.style.display = 'flex';
+    }
+
+    function readExplanation() {
+        const q = questions[currentQIndex];
+        const plainTextExplanation = q.explanation.replace(/<br>/g, "。").replace(/<[^>]*>/g, "");
+        speakCantonese(`正確答案是 ${q.options[q.answer]}。${plainTextExplanation}`);
+    }
+
+    function nextQuestion() {
+        document.getElementById('explanation-modal').style.display = 'none';
+        currentQIndex++;
+
+        if (currentQIndex < questions.length) {
+            loadQuestion();
+        } else {
+            showEndScreen();
+        }
+    }
+
+    function updateScore() {
+        document.getElementById('score').innerText = score;
+    }
+
+    function renderDiagram(type, data) {
+        if (type === 'grid100') {
+            let cells = '';
+            for (let i = 0; i < 100; i++) {
+                const isShaded = i < data.shaded;
+                cells += `<div class="grid-cell ${isShaded ? 'shaded' : ''}"></div>`;
+            }
+            return `
+                <div style="text-align:center;">
+                    <div class="grid-100">${cells}</div>
+                    <p style="margin-top:8px; font-weight:bold; color:#2B6CB0;">${data.label || ''}</p>
+                </div>
+            `;
+        } else if (type === 'grid10') {
+            let cells = '';
+            for (let i = 0; i < 10; i++) {
+                const isShaded = i < data.shaded;
+                cells += `<div class="grid-cell ${isShaded ? 'shaded' : ''}"></div>`;
+            }
+            return `
+                <div style="text-align:center;">
+                    <div class="grid-10">${cells}</div>
+                    <p style="margin-top:8px; font-weight:bold; color:#2B6CB0;">${data.label || ''}</p>
+                </div>
+            `;
+        } else if (type === 'bar') {
+            let segments = '';
+            for (let i = 0; i < data.total; i++) {
+                const isShaded = i < data.shaded;
+                segments += `<div class="fraction-segment ${isShaded ? 'shaded' : ''}">${i+1}</div>`;
+            }
+            return `
+                <div style="text-align:center;">
+                    <div class="fraction-bar">${segments}</div>
+                    <p style="margin-top:8px; font-weight:bold; color:#2B6CB0;">${data.label || ''}</p>
+                </div>
+            `;
+        } else if (type === 'mixed') {
+            return `
+                <div style="text-align:center;">
+                    <div style="display:flex; gap:10px; justify-content:center; align-items:center; flex-wrap:wrap;">
+                        <div style="background:#4D96FF; color:white; padding:15px; border-radius:10px; font-weight:bold;">
+                            完整 1 個整體 (100%)
+                        </div>
+                        <span style="font-size:24px; font-weight:bold;">+</span>
+                        <div style="border:2px dashed #4D96FF; padding:10px; border-radius:10px;">
+                            多出 ${data.extraShaded}%
+                        </div>
+                    </div>
+                    <p style="margin-top:10px; font-weight:bold; color:#2B6CB0;">${data.label || ''}</p>
+                </div>
+            `;
+        }
+        return '';
+    }
+
+    function showEndScreen() {
+        document.getElementById('question-screen').style.display = 'none';
+        document.getElementById('end-screen').style.display = 'block';
+        document.getElementById('progress-bar').style.width = '100%';
+
+        document.getElementById('final-score').innerText = score;
+        document.getElementById('correct-count').innerText = correctCount;
+
+        let stars = "⭐⭐⭐";
+        let msg = "非常出色！你已經完全掌握了分數、百分數和小數互化！";
+
+        if (correctCount < 12) {
+            stars = "⭐";
+            msg = "繼續加油！多做幾次練習，你會變得越來越棒！";
+        } else if (correctCount < 17) {
+            stars = "⭐⭐";
+            msg = "做得很好！已經掌握了大部分題目呢！";
+        }
+
+        document.getElementById('star-rating').innerText = stars;
+        document.getElementById('final-message').innerText = msg;
+        speakCantonese(`挑戰完成！你的得分是 ${score} 分。${msg}`);
+    }
+
+    function restartGame() {
+        document.getElementById('end-screen').style.display = 'none';
+        document.getElementById('start-screen').style.display = 'block';
+    }
+</script>
+</body>
+</html>

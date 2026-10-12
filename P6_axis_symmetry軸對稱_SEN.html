@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小六數學：軸對稱圖形大冒險 (SEN友善版 V2)</title>
+    <style>
+        :root {
+            --primary-color: #4A90E2;
+            --secondary-color: #FF9F43;
+            --success-color: #2ECC71;
+            --danger-color: #EE5253;
+            --bg-color: #F0F7FF;
+            --card-bg: #FFFFFF;
+            --text-color: #2D3436;
+            --font-size-base: 20px;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Comic Sans MS', 'Chalkboard SE', 'Microsoft JhengHei', '微軟正黑體', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 15px;
+            font-size: var(--font-size-base);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border: 4px solid #BEE3F8;
+        }
+
+        header {
+            text-align: center;
+            border-bottom: 3px dashed #CBD5E0;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #2B6CB0;
+            font-size: 28px;
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .subtitle {
+            font-size: 18px;
+            color: #4A5568;
+            background: #EBF8FF;
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 15px;
+        }
+
+        /* Stats & Controls */
+        .game-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #EDF2F7;
+            padding: 12px 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .stat-item {
+            font-weight: bold;
+            font-size: 20px;
+        }
+
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            font-size: 18px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: bold;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            opacity: 0.9;
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+        }
+
+        .btn-tts {
+            background-color: #9B59B6;
+        }
+
+        .btn-tts:hover {
+            background-color: #8E44AD;
+        }
+
+        .btn-reset {
+            background-color: #718096;
+        }
+
+        /* Question Box */
+        .question-card {
+            display: none;
+            background: #FAFCFF;
+            border: 3px solid #E2E8F0;
+            border-radius: 18px;
+            padding: 20px;
+            margin-bottom: 20px;
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        .question-card.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            gap: 10px;
+        }
+
+        .question-num {
+            background: #3182CE;
+            color: white;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .question-title {
+            font-size: 22px;
+            font-weight: bold;
+            color: #2D3748;
+            margin: 10px 0;
+        }
+
+        /* Graphics Area */
+        .svg-container {
+            text-align: center;
+            margin: 15px 0;
+            background: #FFFFFF;
+            padding: 15px;
+            border-radius: 15px;
+            border: 2px dashed #CBD5E0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 180px;
+        }
+
+        /* Options */
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .option-btn {
+            background: #FFFFFF;
+            border: 3px solid #CBD5E0;
+            border-radius: 15px;
+            padding: 15px 20px;
+            font-size: 20px;
+            font-weight: bold;
+            color: #4A5568;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s ease;
+            box-shadow: 0 3px 5px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .option-btn:hover {
+            border-color: var(--primary-color);
+            background-color: #EBF8FF;
+            transform: scale(1.02);
+        }
+
+        .option-btn.selected {
+            border-color: var(--primary-color);
+            background-color: #BEE3F8;
+        }
+
+        .option-btn.correct {
+            background-color: #C6F6D5 !important;
+            border-color: var(--success-color) !important;
+            color: #22543D !important;
+        }
+
+        .option-btn.wrong {
+            background-color: #FED7D7 !important;
+            border-color: var(--danger-color) !important;
+            color: #742A2A !important;
+        }
+
+        /* Feedback Section */
+        .feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 20px;
+            font-weight: bold;
+            display: none;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .feedback.correct-bg {
+            background: #E6FFFA;
+            color: #234E52;
+            border: 2px solid #38B2AC;
+        }
+
+        .feedback.wrong-bg {
+            background: #FFF5F5;
+            color: #742A2A;
+            border: 2px solid #FEB2B2;
+        }
+
+        .explanation {
+            margin-top: 8px;
+            font-size: 18px;
+            font-weight: normal;
+            color: #4A5568;
+        }
+
+        /* Navigation Buttons */
+        .nav-controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 25px;
+        }
+
+        /* Final Result Card */
+        #result-card {
+            display: none;
+            text-align: center;
+            padding: 30px;
+            background: #F7FAFC;
+            border-radius: 20px;
+            border: 3px solid #E2E8F0;
+        }
+
+        .star-rating {
+            font-size: 50px;
+            margin: 15px 0;
+        }
+
+        .badge-list {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            background: #FEFCBF;
+            border: 2px solid #D69E2E;
+            padding: 10px 18px;
+            border-radius: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #744210;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            width: 100%;
+            background-color: #E2E8F0;
+            border-radius: 10px;
+            height: 16px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: var(--primary-color);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        /* SVG Shape Styles */
+        .shape-main {
+            fill: #63B3ED;
+            stroke: #2B6CB0;
+            stroke-width: 3;
+        }
+        .shape-alt {
+            fill: #F6AD55;
+            stroke: #DD6B20;
+            stroke-width: 3;
+        }
+        .axis-line {
+            stroke: #E53E3E;
+            stroke-width: 3;
+            stroke-dasharray: 6, 6;
+        }
+        .axis-line-wrong {
+            stroke: #718096;
+            stroke-width: 3;
+            stroke-dasharray: 4, 4;
+        }
+        .axis-line-green {
+            stroke: #38A169;
+            stroke-width: 3.5;
+            stroke-dasharray: 6, 6;
+        }
+
+        @media (max-width: 600px) {
+            body { padding: 8px; }
+            .container { padding: 15px; }
+            h1 { font-size: 22px; }
+            .options-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>✨ 小六軸對稱圖形大冒險 📐</h1>
+        <div class="subtitle">🎯 SEN 互動練習遊戲（20題完整關卡）</div>
+    </header>
+
+    <div class="game-bar">
+        <div class="stat-item">🏆 得分：<span id="score">0</span> / 100</div>
+        <div class="stat-item">📌 關卡：<span id="current-q">1</span> / 20</div>
+        <button class="btn btn-reset" onclick="resetGame()">🔄 重新開始</button>
+    </div>
+
+    <div class="progress-container">
+        <div class="progress-bar" id="progress-bar"></div>
+    </div>
+
+    <!-- QUESTIONS CONTAINER -->
+    <div id="quiz-container">
+        <!-- Questions generated via JavaScript -->
+    </div>
+
+    <!-- RESULT CONTAINER -->
+    <div id="result-card">
+        <h2>🎉 恭喜你完成所有挑戰！ 🎉</h2>
+        <div class="star-rating" id="stars">⭐⭐⭐</div>
+        <h3 id="result-text" style="color: #2B6CB0; font-size: 26px;"></h3>
+        <p id="result-detail" style="font-size: 20px;"></p>
+        
+        <div class="badge-list" id="badge-container">
+            <!-- Badges -->
+        </div>
+
+        <div style="margin-top: 25px; display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
+            <button class="btn" style="background-color: #38A169;" onclick="resetGame()">🔄 再玩一次</button>
+            <button class="btn" style="background-color: #D69E2E;" onclick="window.print()">🖨️ 列印/儲存成績紀錄</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+// Question Database (20 Questions based on HK P6 Curriculum & SEN friendly approach)
+const questionsData = [
+    {
+        id: 1,
+        title: "辨別軸對稱圖形",
+        question: "觀察右圖的正方形，它是軸對稱圖形嗎？",
+        svg: `<svg width="180" height="180" viewBox="0 0 180 180">
+                <rect x="30" y="30" width="120" height="120" class="shape-main" rx="4" />
+                <line x1="90" y1="10" x2="90" y2="170" class="axis-line" />
+              </svg>`,
+        options: ["A. 是 (軸對稱圖形)", "B. 否 (不是軸對稱圖形)"],
+        answer: 0,
+        explanation: "正方形可以沿著中間的虛線對折，左右兩邊完全重合，所以它是軸對稱圖形！"
+    },
+    {
+        id: 2,
+        title: "辨別軸對稱圖形",
+        question: "觀察下面的普通平行四邊形（非長方形/菱形），它是軸對稱圖形嗎？",
+        svg: `<svg width="220" height="160" viewBox="0 0 220 160">
+                <polygon points="50,30 200,30 170,130 20,130" class="shape-alt" />
+              </svg>`,
+        options: ["A. 是 (軸對稱圖形)", "B. 否 (不是軸對稱圖形)"],
+        answer: 1,
+        explanation: "一般的平行四邊形無論怎樣對折，兩邊都無法完全重合，所以它不是軸對稱圖形。"
+    },
+    {
+        id: 3,
+        title: "排除非對稱圖形",
+        question: "下列哪一個圖形**不是**軸對稱圖形？",
+        svg: `<svg width="280" height="150" viewBox="0 0 280 150">
+                <!-- A: 等腰三角形 -->
+                <g transform="translate(10,20)">
+                  <polygon points="40,10 70,90 10,90" fill="#4FD1C5" stroke="#234E52" stroke-width="2"/>
+                  <text x="40" y="115" text-anchor="middle" font-weight="bold">A. 等腰三角形</text>
+                </g>
+                <!-- B: 不等邊斜三角形 -->
+                <g transform="translate(150,20)">
+                  <polygon points="20,10 110,85 10,100" fill="#FC8181" stroke="#9B2C2C" stroke-width="2"/>
+                  <text x="60" y="115" text-anchor="middle" font-weight="bold">B. 不等邊三角形</text>
+                </g>
+              </svg>`,
+        options: ["A. 等腰三角形", "B. 不等邊三角形"],
+        answer: 1,
+        explanation: "不等邊三角形的三條邊長度都不相同，無法對折重合，因此不是軸對稱圖形。"
+    },
+    {
+        id: 4,
+        title: "尋找對稱圖形",
+        question: "觀察下列圖形，哪一個是軸對稱圖形？",
+        svg: `<svg width="280" height="150" viewBox="0 0 280 150">
+                <!-- A: 箭頭 -->
+                <g transform="translate(20,20)">
+                  <polygon points="40,10 70,50 55,50 55,90 25,90 25,50 10,50" class="shape-main"/>
+                  <line x1="40" y1="0" x2="40" y2="100" class="axis-line"/>
+                  <text x="40" y="115" text-anchor="middle" font-weight="bold">圖形 A</text>
+                </g>
+                <!-- B: 梯形斜角 -->
+                <g transform="translate(150,20)">
+                  <polygon points="10,20 90,20 110,90 20,90" class="shape-alt"/>
+                  <text x="60" y="115" text-anchor="middle" font-weight="bold">圖形 B</text>
+                </g>
+              </svg>`,
+        options: ["A. 圖形 A (箭頭圖形)", "B. 圖形 B (一般梯形)"],
+        answer: 0,
+        explanation: "圖形 A（箭頭圖形）沿垂直虛線對折後，左右兩邊完全重合，是軸對稱圖形！"
+    },
+    {
+        id: 5,
+        title: "數一數對稱軸",
+        question: "正方形（Square）共有多少條對稱軸？",
+        svg: `<svg width="180" height="180" viewBox="0 0 180 180">
+                <rect x="30" y="30" width="120" height="120" class="shape-main" />
+                <line x1="90" y1="10" x2="90" y2="170" class="axis-line" />
+                <line x1="10" y1="90" x2="170" y2="90" class="axis-line" />
+                <line x1="20" y1="20" x2="160" y2="160" class="axis-line" />
+                <line x1="160" y1="20" x2="20" y2="160" class="axis-line" />
+              </svg>`,
+        options: ["A. 2 條", "B. 3 條", "C. 4 條", "D. 無數條"],
+        answer: 2,
+        explanation: "正方形有 4 條對稱軸：包括 1 條垂直中線、1 條水平中線，以及 2 條對角線。"
+    },
+    {
+        id: 6,
+        title: "數一數對稱軸",
+        question: "等邊三角形（Equilateral Triangle）共有多少條對稱軸？",
+        svg: `<svg width="180" height="170" viewBox="0 0 180 170">
+                <polygon points="90,20 160,140 20,140" class="shape-main" />
+                <line x1="90" y1="10" x2="90" y2="155" class="axis-line" />
+                <line x1="20" y1="140" x2="130" y2="75" class="axis-line" />
+                <line x1="160" y1="140" x2="50" y2="75" class="axis-line" />
+              </svg>`,
+        options: ["A. 1 條", "B. 2 條", "C. 3 條", "D. 6 條"],
+        answer: 2,
+        explanation: "等邊三角形的三條邊長度和三個角都相等，從每個頂點向對邊畫中線，共有 3 條對稱軸。"
+    },
+    {
+        id: 7,
+        title: "長方形的對稱軸",
+        question: "長方形（Rectangle）共有多少條對稱軸？（注意：對角線是否是對稱軸？）",
+        svg: `<svg width="200" height="150" viewBox="0 0 200 150">
+                <rect x="20" y="30" width="160" height="90" class="shape-main" />
+                <line x1="100" y1="15" x2="100" y2="135" class="axis-line" />
+                <line x1="10" y1="75" x2="190" y2="75" class="axis-line" />
+              </svg>`,
+        options: ["A. 1 條", "B. 2 條", "C. 4 條", "D. 0 條"],
+        answer: 1,
+        explanation: "長方形只有 2 條對稱軸（水平中線與垂直中線）。長方形沿對角線對折時，兩邊並不能重合！"
+    },
+    {
+        id: 8,
+        title: "特殊圖形的對稱軸",
+        question: "圓形（Circle）共有多少條對稱軸？",
+        svg: `<svg width="180" height="180" viewBox="0 0 180 180">
+                <circle cx="90" cy="90" r="70" fill="#FEB2B2" stroke="#C53030" stroke-width="3"/>
+                <line x1="90" y1="10" x2="90" y2="170" class="axis-line" />
+                <line x1="10" y1="90" x2="170" y2="90" class="axis-line" />
+                <line x1="33" y1="33" x2="147" y2="147" class="axis-line" />
+                <line x1="147" y1="33" x2="33" y2="147" class="axis-line" />
+              </svg>`,
+        options: ["A. 1 條", "B. 4 條", "C. 8 條", "D. 無數條"],
+        answer: 3,
+        explanation: "圓形的任何一條直徑都是它的對稱軸，因此圓形擁有無數條對稱軸！"
+    },
+    {
+        id: 9,
+        title: "十字圖形的對稱軸",
+        question: "觀察右圖正十字形（加號 +），它共有多少條對稱軸？",
+        svg: `<svg width="180" height="180" viewBox="0 0 180 180">
+                <polygon points="60,20 120,20 120,60 160,60 160,120 120,120 120,160 60,160 60,120 20,120 20,60 60,60" fill="#BEE3F8" stroke="#2B6CB0" stroke-width="3"/>
+                <line x1="90" y1="10" x2="90" y2="170" class="axis-line"/>
+                <line x1="10" y1="90" x2="170" y2="90" class="axis-line"/>
+                <line x1="25" y1="25" x2="155" y2="155" class="axis-line"/>
+                <line x1="155" y1="25" x2="25" y2="155" class="axis-line"/>
+              </svg>`,
+        options: ["A. 2 條", "B. 4 條", "C. 6 條", "D. 8 條"],
+        answer: 1,
+        explanation: "正十字形有 4 條對稱軸：1 條垂直中線、1 條水平中線，以及 2 條斜對角線。"
+    },
+    {
+        id: 10,
+        title: "中文漢字對稱大搜查",
+        question: "觀察下列中文漢字，哪一個是軸對稱圖形？",
+        svg: `<svg width="300" height="130" viewBox="0 0 300 130">
+                <g transform="translate(40,10)">
+                  <text x="40" y="80" font-size="70" font-weight="bold" fill="#2B6CB0" text-anchor="middle">中</text>
+                  <line x1="40" y1="5" x2="40" y2="95" class="axis-line-green"/>
+                  <text x="40" y="115" text-anchor="middle" font-size="16">選項 A</text>
+                </g>
+                <g transform="translate(180,10)">
+                  <text x="40" y="80" font-size="70" font-weight="bold" fill="#DD6B20" text-anchor="middle">手</text>
+                  <text x="40" y="115" text-anchor="middle" font-size="16">選項 B</text>
+                </g>
+              </svg>`,
+        options: ["A. 漢字「中」", "B. 漢字「手」"],
+        answer: 0,
+        explanation: "漢字「中」有一條垂直對稱軸，沿著中間對折後左右兩邊完全重合！"
+    },
+    {
+        id: 11,
+        title: "菱形的對稱軸",
+        question: "菱形（Rhombus）共有多少條對稱軸？",
+        svg: `<svg width="180" height="160" viewBox="0 0 180 160">
+                <polygon points="90,20 160,80 90,140 20,80" fill="#FAF089" stroke="#D69E2E" stroke-width="3"/>
+                <line x1="90" y1="10" x2="90" y2="150" class="axis-line"/>
+                <line x1="10" y1="80" x2="170" y2="80" class="axis-line"/>
+              </svg>`,
+        options: ["A. 1 條", "B. 2 條", "C. 4 條", "D. 0 條"],
+        answer: 1,
+        explanation: "菱形有 2 條對稱軸，就是連接相對頂點的兩條對角線。"
+    },
+    {
+        id: 12,
+        title: "英文字母對稱大搜查",
+        question: "下列哪一個英文字母是軸對稱圖形？",
+        svg: `<svg width="300" height="120" viewBox="0 0 300 120">
+                <text x="40" y="80" font-size="70" font-weight="bold" fill="#E53E3E">F</text>
+                <text x="120" y="80" font-size="70" font-weight="bold" fill="#3182CE">A</text>
+                <text x="200" y="80" font-size="70" font-weight="bold" fill="#DD6B20">R</text>
+              </svg>`,
+        options: ["A. 字母 F", "B. 字母 A", "C. 字母 R"],
+        answer: 1,
+        explanation: "字母「A」有一條直立的垂直對稱軸，對折後左右兩邊完全重合！"
+    },
+    {
+        id: 13,
+        title: "英文字母對稱軸數量",
+        question: "英文字母「H」共有多少條對稱軸？",
+        svg: `<svg width="180" height="160" viewBox="0 0 180 160">
+                <text x="90" y="120" font-size="110" font-weight="bold" fill="#805AD5" text-anchor="middle">H</text>
+                <line x1="90" y1="10" x2="90" y2="140" class="axis-line"/>
+                <line x1="30" y1="70" x2="150" y2="70" class="axis-line"/>
+              </svg>`,
+        options: ["A. 1 條", "B. 2 條", "C. 3 條", "D. 0 條"],
+        answer: 1,
+        explanation: "字母「H」有 2 條對稱軸：1 條垂直中線，以及 1 條水平中線。"
+    },
+    {
+        id: 14,
+        title: "尋找只有1條對稱軸的字母",
+        question: "下列哪一個字母**只有 1 條**對稱軸？",
+        svg: `<svg width="300" height="120" viewBox="0 0 300 120">
+                <!-- M -->
+                <g transform="translate(30,10)">
+                  <text x="40" y="80" font-size="75" font-weight="bold" fill="#319795">M</text>
+                </g>
+                <!-- H -->
+                <g transform="translate(170,10)">
+                  <text x="40" y="80" font-size="75" font-weight="bold" fill="#D69E2E">H</text>
+                </g>
+              </svg>`,
+        options: ["A. 字母 M", "B. 字母 H"],
+        answer: 0,
+        explanation: "字母 M 只有 1 條垂直對稱軸；而字母 H 有 2 條對稱軸（垂直及水平）。"
+    },
+    {
+        id: 15,
+        title: "五角星對稱軸數量",
+        question: "觀察右圖的正五角星（⭐），它共有多少條對稱軸？",
+        svg: `<svg width="180" height="180" viewBox="0 0 180 180">
+                <polygon points="90,15 112,65 166,65 122,98 139,150 90,118 41,150 58,98 14,65 68,65" fill="#ECC94B" stroke="#D69E2E" stroke-width="3"/>
+                <line x1="90" y1="5" x2="90" y2="170" class="axis-line"/>
+              </svg>`,
+        options: ["A. 1 條", "B. 3 條", "C. 5 條", "D. 10 條"],
+        answer: 2,
+        explanation: "正五角星有 5 個尖角，從每一個尖角對準對面凹角畫虛線，共有 5 條對稱軸。"
+    },
+    {
+        id: 16,
+        title: "生活中的軸對稱",
+        question: "美麗的蝴蝶展開翅膀時，它的對稱軸在哪裏？",
+        svg: `<svg width="200" height="160" viewBox="0 0 200 160">
+                <!-- Simple SVG Butterfly -->
+                <path d="M 100,80 Q 40,10 20,60 Q 30,110 100,90 Z" fill="#F6AD55" stroke="#DD6B20" stroke-width="2"/>
+                <path d="M 100,80 Q 160,10 180,60 Q 170,110 100,90 Z" fill="#F6AD55" stroke="#DD6B20" stroke-width="2"/>
+                <path d="M 100,90 Q 50,100 40,130 Q 80,150 100,100 Z" fill="#F687B3" stroke="#B83280" stroke-width="2"/>
+                <path d="M 100,90 Q 150,100 160,130 Q 120,150 100,100 Z" fill="#F687B3" stroke="#B83280" stroke-width="2"/>
+                <ellipse cx="100" cy="90" rx="6" ry="35" fill="#2D3748"/>
+                <line x1="100" y1="10" x2="100" y2="155" class="axis-line-green"/>
+              </svg>`,
+        options: ["A. 橫向中間（水平）", "B. 身體中央（垂直）", "C. 斜向左邊"],
+        answer: 1,
+        explanation: "蝴蝶的左右翅膀形狀和花紋相同，對稱軸穿過身體中央（垂直方向）。"
+    },
+    {
+        id: 17,
+        title: "剪紙藝術與對稱",
+        question: "小明將一張正方形紙張**對折一次**，剪下一個圖形後展開，展開後的圖形必然是什麼？",
+        svg: `<svg width="220" height="140" viewBox="0 0 220 140">
+                <rect x="20" y="20" width="80" height="100" fill="#E2E8F0" stroke="#4A5568" stroke-dasharray="4,4" stroke-width="2"/>
+                <path d="M 100,20 L 100,120 L 60,100 L 80,70 L 50,50 Z" fill="#E53E3E"/>
+                <text x="140" y="75" font-size="30">➡️ ✂️</text>
+              </svg>`,
+        options: ["A. 軸對稱圖形", "B. 立體圓柱體", "C. 不規則圖形"],
+        answer: 0,
+        explanation: "因為是由對折的紙張剪出的，展開後折痕就是對稱軸，所以必定是軸對稱圖形！"
+    },
+    {
+        id: 18,
+        title: "正六邊形的對稱軸",
+        question: "正六邊形（Regular Hexagon）共有多少條對稱軸？",
+        svg: `<svg width="180" height="170" viewBox="0 0 180 170">
+                <polygon points="90,15 150,50 150,120 90,155 30,120 30,50" fill="#68D391" stroke="#22543D" stroke-width="3"/>
+                <line x1="90" y1="5" x2="90" y2="165" class="axis-line"/>
+                <line x1="20" y1="45" x2="160" y2="125" class="axis-line"/>
+                <line x1="20" y1="125" x2="160" y2="45" class="axis-line"/>
+              </svg>`,
+        options: ["A. 3 條", "B. 4 條", "C. 6 條", "D. 12 條"],
+        answer: 2,
+        explanation: "正多邊形的對稱軸數量等於它的邊數！正六邊形有 6 條邊，所以有 6 條對稱軸。"
+    },
+    {
+        id: 19,
+        title: "判斷對稱軸正確性",
+        question: "（歷屆考題）觀察下圖長方形，這條**斜線**是它的對稱軸嗎？",
+        svg: `<svg width="200" height="150" viewBox="0 0 200 150">
+                <rect x="30" y="25" width="140" height="100" class="shape-main"/>
+                <line x1="30" y1="25" x2="170" y2="125" class="axis-line-wrong"/>
+              </svg>`,
+        options: ["A. 是 (對折後能完全重合)", "B. 否 (對折後頂點會歪向兩邊)"],
+        answer: 1,
+        explanation: "不是！長方形沿斜對角線對折時，角落會重疊不起來，因此對角線不是長方形的對稱軸。"
+    },
+    {
+        id: 20,
+        title: "等腰梯形的對稱軸",
+        question: "等腰梯形（Isosceles Trapezium）共有多少條對稱軸？",
+        svg: `<svg width="200" height="160" viewBox="0 0 200 160">
+                <polygon points="50,30 150,30 180,130 20,130" fill="#F6AD55" stroke="#C05621" stroke-width="3"/>
+                <line x1="100" y1="10" x2="100" y2="150" class="axis-line-green"/>
+              </svg>`,
+        options: ["A. 1 條 (垂直中線)", "B. 2 條", "C. 4 條", "D. 0 條"],
+        answer: 0,
+        explanation: "等腰梯形只有 1 條對稱軸，就是穿過上底與下底中點的垂直中線。"
+    }
+];
+
+let currentQuestionIndex = 0;
+let userAnswers = new Array(questionsData.length).fill(null);
+let score = 0;
+
+// Initialize game
+function initGame() {
+    renderQuiz();
+    showQuestion(0);
+    updateStats();
+}
+
+function renderQuiz() {
+    const container = document.getElementById('quiz-container');
+    container.innerHTML = '';
+
+    questionsData.forEach((q, index) => {
+        const card = document.createElement('div');
+        card.className = `question-card ${index === 0 ? 'active' : ''}`;
+        card.id = `q-card-${index}`;
+
+        let optionsHTML = '';
+        q.options.forEach((opt, optIdx) => {
+            optionsHTML += `
+                <button class="option-btn" id="opt-${index}-${optIdx}" onclick="selectOption(${index}, ${optIdx})">
+                    ${opt}
+                </button>
+            `;
+        });
+
+        card.innerHTML = `
+            <div class="question-header">
+                <span class="question-num">第 ${index + 1} / ${questionsData.length} 題</span>
+                <button class="btn btn-tts" onclick="speakQuestion(${index})">🔊 廣東話朗讀題目</button>
+            </div>
+            <div class="question-title">${q.title}：${q.question}</div>
+            
+            <div class="svg-container">
+                ${q.svg}
+            </div>
+
+            <div class="options-grid">
+                ${optionsHTML}
+            </div>
+
+            <div class="feedback" id="feedback-${index}">
+                <span id="feedback-icon-${index}"></span>
+                <div>
+                    <div id="feedback-msg-${index}"></div>
+                    <div class="explanation" id="explanation-${index}">💡 解析：${q.explanation}</div>
+                </div>
+            </div>
+
+            <div class="nav-controls">
+                <button class="btn" style="background:#A0AEC0;" onclick="prevQuestion()" ${index === 0 ? 'disabled style="opacity:0.5"' : ''}>⬅️ 上一題</button>
+                <button class="btn" style="background:#3182CE;" id="next-btn-${index}" onclick="nextQuestion()" disabled>下一題 ➡️</button>
+            </div>
+        `;
+
+        container.appendChild(card);
+    });
+}
+
+function showQuestion(index) {
+    document.querySelectorAll('.question-card').forEach(card => card.classList.remove('active'));
+    const target = document.getElementById(`q-card-${index}`);
+    if (target) {
+        target.classList.add('active');
+        currentQuestionIndex = index;
+        updateStats();
+    }
+}
+
+function selectOption(qIdx, optIdx) {
+    if (userAnswers[qIdx] !== null) return; // Already answered
+
+    userAnswers[qIdx] = optIdx;
+    const q = questionsData[qIdx];
+    const isCorrect = (optIdx === q.answer);
+
+    const btnSelected = document.getElementById(`opt-${qIdx}-${optIdx}`);
+    const feedbackBox = document.getElementById(`feedback-${qIdx}`);
+    const feedbackIcon = document.getElementById(`feedback-icon-${qIdx}`);
+    const feedbackMsg = document.getElementById(`feedback-msg-${qIdx}`);
+    const nextBtn = document.getElementById(`next-btn-${qIdx}`);
+
+    if (isCorrect) {
+        score += 5; // 20 questions * 5 = 100
+        btnSelected.classList.add('correct');
+        feedbackBox.className = "feedback correct-bg";
+        feedbackIcon.innerText = "🎉";
+        feedbackMsg.innerText = "答對了！太棒了！得 5 分！";
+        speakText("答對了！太棒了！");
+    } else {
+        btnSelected.classList.add('wrong');
+        const correctBtn = document.getElementById(`opt-${qIdx}-${q.answer}`);
+        if (correctBtn) correctBtn.classList.add('correct');
+        feedbackBox.className = "feedback wrong-bg";
+        feedbackIcon.innerText = "💡";
+        feedbackMsg.innerText = "再接再厲！正確答案已經標示出來囉！";
+        speakText("沒關係，我們一起看看解析！");
+    }
+
+    feedbackBox.style.display = "flex";
+    nextBtn.disabled = false;
+    updateStats();
+}
+
+function nextQuestion() {
+    if (currentQuestionIndex < questionsData.length - 1) {
+        showQuestion(currentQuestionIndex + 1);
+    } else {
+        showFinalResult();
+    }
+}
+
+function prevQuestion() {
+    if (currentQuestionIndex > 0) {
+        showQuestion(currentQuestionIndex - 1);
+    }
+}
+
+function updateStats() {
+    document.getElementById('score').innerText = score;
+    document.getElementById('current-q').innerText = currentQuestionIndex + 1;
+    const pct = ((currentQuestionIndex + 1) / questionsData.length) * 100;
+    document.getElementById('progress-bar').style.width = pct + '%';
+}
+
+function showFinalResult() {
+    document.getElementById('quiz-container').style.display = 'none';
+    const resultCard = document.getElementById('result-card');
+    resultCard.style.display = 'block';
+
+    const stars = document.getElementById('stars');
+    const resultText = document.getElementById('result-text');
+    const resultDetail = document.getElementById('result-detail');
+    const badgeContainer = document.getElementById('badge-container');
+
+    let starStr = "";
+    let mainMsg = "";
+    let detailMsg = "";
+    let badges = [];
+
+    if (score >= 90) {
+        starStr = "⭐⭐⭐⭐⭐";
+        mainMsg = "太厲害了！你是「軸對稱數學大師」！🏆";
+        detailMsg = `你的總得分是 ${score} 分！對軸對稱圖形的概念掌握得非常完美！`;
+        badges = ["🏅 軸對稱大師", "🌟 滿分勇士", "📐 幾何天才"];
+    } else if (score >= 70) {
+        starStr = "⭐⭐⭐⭐";
+        mainMsg = "非常好！表現非常棒！🌟";
+        detailMsg = `你的總得分是 ${score} 分！繼續保持，你已經掌握大部分對稱概念了！`;
+        badges = ["🏅 對稱達人", "⚡ 幾何小能手"];
+    } else {
+        starStr = "⭐⭐⭐";
+        mainMsg = "加油！你已經完成挑戰了！加油讚！加油💪";
+        detailMsg = `你的總得分是 ${score} 分！多複習幾次，一定會越來越厲害！`;
+        badges = ["🏅 勇敢挑戰者", "🌱 努力進步獎"];
+    }
+
+    stars.innerText = starStr;
+    resultText.innerText = mainMsg;
+    resultDetail.innerText = detailMsg;
+
+    badgeContainer.innerHTML = badges.map(b => `<span class="badge">${b}</span>`).join('');
+    speakText(`挑戰結束！${mainMsg}`);
+}
+
+function resetGame() {
+    currentQuestionIndex = 0;
+    userAnswers = new Array(questionsData.length).fill(null);
+    score = 0;
+    document.getElementById('quiz-container').style.display = 'block';
+    document.getElementById('result-card').style.display = 'none';
+    initGame();
+}
+
+// Speech Synthesis (Cantonese / zh-HK)
+function speakText(text) {
+    if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel(); // stop previous speech
+        const utterance = new SpeechSynthesisUtterance(text);
+        
+        // Find Cantonese voice
+        const voices = window.speechSynthesis.getVoices();
+        const hkVoice = voices.find(v => v.lang === 'zh-HK' || v.lang === 'yue-Hant-HK' || v.name.includes('Cantonese') || v.name.includes('Hong Kong'));
+        
+        if (hkVoice) {
+            utterance.voice = hkVoice;
+        } else {
+            utterance.lang = 'zh-HK'; // fallback
+        }
+        
+        utterance.rate = 0.85; // slightly slower for SEN students
+        utterance.pitch = 1.0;
+        window.speechSynthesis.speak(utterance);
+    }
+}
+
+function speakQuestion(index) {
+    const q = questionsData[index];
+    const textToRead = `${q.title}。${q.question}。選項有：${q.options.join('；')}`;
+    speakText(textToRead);
+}
+
+// Pre-load voices
+if ('speechSynthesis' in window) {
+    window.speechSynthesis.onvoiceschanged = () => {
+        window.speechSynthesis.getVoices();
+    };
+}
+
+// Start game on load
+window.onload = initGame;
+</script>
+
+</body>
+</html>
